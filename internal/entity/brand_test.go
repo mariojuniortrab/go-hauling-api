@@ -18,3 +18,10 @@ func Test_If_NewBrand_Return_An_Error_If_Name_Is_Blank(t *testing.T) {
 
 	assert.ErrorContains(t, error, "name is required")
 }
+
+func Test_If_NewBrand_Return_An_ID(t *testing.T) {
+	name := "any_name"
+	brand, _ := entity.NewBrand(name)
+
+	assert.NotNil(t, brand.ID)
+}
