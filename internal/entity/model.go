@@ -2,6 +2,7 @@ package entity
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	infra_errors "github.com/mariojuniortrab/hauling-api/internal/infra/errors"
 )
 
@@ -22,4 +23,19 @@ func (m *Model) Validate() error {
 	}
 
 	return nil
+}
+
+func NewModel(name string, brand *Brand) (*Model, error) {
+	model := Model{
+		ID:    uuid.New().String(),
+		Name:  name,
+		Brand: *brand,
+	}
+
+	error := model.Validate()
+	if error != nil {
+		return nil, error
+	}
+
+	return &model, nil
 }
