@@ -12,3 +12,9 @@ func Test_If_Gets_AN_Error_If_Name_Is_Blank(t *testing.T) {
 
 	assert.ErrorContains(t, brand.Validate(), "name is required")
 }
+
+func Test_If_NewBrand_Return_An_Error_If_Name_Is_Blank(t *testing.T) {
+	_, error := entity.NewBrand("")
+
+	assert.ErrorContains(t, error, "name is required")
+}
