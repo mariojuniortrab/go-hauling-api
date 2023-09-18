@@ -25,3 +25,10 @@ func Test_If_NewBrand_Return_An_ID(t *testing.T) {
 
 	assert.NotNil(t, brand.ID)
 }
+func Test_If_NewBrand_Return_An_Correct_Brand(t *testing.T) {
+	name := "any_name"
+	brand, _ := entity.NewBrand(name)
+
+	assert.NotNil(t, brand.ID)
+	assert.Equal(t, name, brand.Name)
+}
