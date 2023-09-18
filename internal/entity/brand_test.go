@@ -3,11 +3,12 @@ package entity_test
 import (
 	"testing"
 
+	"github.com/mariojuniortrab/hauling-api/internal/entity"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_If_Gets_AN_Error_If_Name_Is_Blank(t *testing.T) {
-	brand := Brand{}
+	brand := entity.Brand{}
 
-	assert.Error(t, brand.Validate(), "Name is Required")
+	assert.ErrorContains(t, brand.Validate(), "name is required")
 }
