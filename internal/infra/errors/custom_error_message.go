@@ -1,21 +1,18 @@
 package infra_errors
 
 import (
-	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/go-playground/validator/v10"
 )
 
-func GetErrorMessage(v validator.FieldError) error {
-	if v.Tag() == "required" {
-		return errors.New(isRequired(v.Field()))
-	}
-
-	return errors.New("unknown error")
+func IsRequired(field string) error {
+	return fmt.Errorf("%s is required", strings.ToLower(field))
 }
 
-func isRequired(field string) string {
-	return fmt.Sprintf("%s is required", strings.ToLower(field))
+func AlreadyExists(entity string) error {
+	return fmt.Errorf("%s already exists", strings.ToLower(entity))
+}
+
+func MustBeUUID(field string) error {
+	return fmt.Errorf("%s must be uuid", strings.ToLower(field))
 }
