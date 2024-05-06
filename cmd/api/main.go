@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	brand_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/brand"
-	"github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/routes"
-	brand_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/routes/brand"
+	"github.com/mariojuniortrab/hauling-api/internal/infra/web/routes"
+	brand_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/routes/brand"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -25,9 +25,13 @@ func main() {
 	//Routes
 	brandRouter := brand_routes.NewRouter(brandRepository)
 
+	//Using chi with an adapter to manege routes
 	r := routes.NewChiRouteAdapter()
+
+	//routing
 	brandRouter.Route(r)
 
+	//starting server
 	fmt.Println("Server has started")
 	http.ListenAndServe(":8000", r)
 

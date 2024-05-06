@@ -3,7 +3,7 @@ package brand_routes
 import (
 	brand_entity "github.com/mariojuniortrab/hauling-api/internal/entity/brand"
 	brand_handler "github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/brand"
-	"github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/routes"
+	"github.com/mariojuniortrab/hauling-api/internal/infra/web/routes"
 	brand_usecase "github.com/mariojuniortrab/hauling-api/internal/usecase/brand"
 	brand_validation "github.com/mariojuniortrab/hauling-api/internal/validation/brand"
 )
