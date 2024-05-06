@@ -1,10 +1,11 @@
-package validation
+package brand_validation
 
 import (
 	"net/http"
 
 	brand_entity "github.com/mariojuniortrab/hauling-api/internal/entity/brand"
 	infra_errors "github.com/mariojuniortrab/hauling-api/internal/infra/errors"
+	util_validation "github.com/mariojuniortrab/hauling-api/internal/validation/util"
 )
 
 type DetailBrandValidation struct {
@@ -22,7 +23,7 @@ func (v *DetailBrandValidation) Validate(id string) *infra_errors.CustomError {
 		return infra_errors.NewCustomError(infra_errors.IsRequired("id"), http.StatusBadRequest, "id")
 	}
 
-	if !IsUIID(id) {
+	if !util_validation.IsUIID(id) {
 		return infra_errors.NewCustomError(infra_errors.MustBeUUID("id"), http.StatusBadRequest, "id")
 	}
 

@@ -1,4 +1,4 @@
-package validation
+package util_validation
 
 import "github.com/google/uuid"
 

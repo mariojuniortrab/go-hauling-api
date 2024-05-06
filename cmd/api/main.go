@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	brand_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/brand"
-	brand_handler "github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/brand"
-	brand_usecase "github.com/mariojuniortrab/hauling-api/internal/usecase/brand"
-	validation "github.com/mariojuniortrab/hauling-api/internal/validation"
+	"github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/routes"
+	brand_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/handlers/routes/brand"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -21,17 +19,14 @@ func main() {
 	}
 	defer db.Close()
 
+	//Repositories
 	brandRepository := brand_repository.NewBrandRepositoryMysql(db)
-	createBrandUseCase := brand_usecase.NewCreateBrandUseCase(brandRepository)
-	listBrandUseCase := brand_usecase.NewListBrandUseCase(brandRepository)
-	createBrandValidation := validation.NewCreateBrandValidation(brandRepository)
 
-	createBrandHandler := brand_handler.NewCreateBrandHandler(createBrandUseCase, createBrandValidation)
-	listBrandHandler := brand_handler.NewListBrandHandler(listBrandUseCase)
+	//Routes
+	brandRouter := brand_routes.NewRouter(brandRepository)
 
-	r := chi.NewRouter()
-	r.Post("/brands", createBrandHandler.Handle)
-	r.Get("/brands", listBrandHandler.Handle)
+	r := routes.NewChiRouteAdapter()
+	brandRouter.Route(r)
 
 	fmt.Println("Server has started")
 	http.ListenAndServe(":8000", r)

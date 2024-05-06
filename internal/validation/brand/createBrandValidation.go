@@ -1,4 +1,4 @@
-package validation
+package brand_validation
 
 import (
 	"net/http"
