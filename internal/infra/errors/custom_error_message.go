@@ -16,3 +16,7 @@ func AlreadyExists(entity string) error {
 func MustBeUUID(field string) error {
 	return fmt.Errorf("%s must be uuid", strings.ToLower(field))
 }
+
+func MustMatch(field1, field2 string) error {
+	return fmt.Errorf("%s does not match %s", strings.ToLower(field1), strings.ToLower(field2))
+}

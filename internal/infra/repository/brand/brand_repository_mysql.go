@@ -10,7 +10,7 @@ type BrandRepositoryMysql struct {
 	DB *sql.DB
 }
 
-func NewBrandRepositoryMysql(db *sql.DB) *BrandRepositoryMysql {
+func NewRepositoryMysql(db *sql.DB) *BrandRepositoryMysql {
 	return &BrandRepositoryMysql{DB: db}
 }
 

@@ -39,7 +39,7 @@ func (v *CreateBrandValidation) Validate(input brand_usecase.CreateBrandInputDto
 	}
 
 	if exists != nil {
-		return infra_errors.NewCustomError(infra_errors.AlreadyExists("brand"), http.StatusInternalServerError, "name")
+		return infra_errors.NewCustomError(infra_errors.AlreadyExists("brand"), http.StatusBadRequest, "name")
 	}
 
 	return nil
