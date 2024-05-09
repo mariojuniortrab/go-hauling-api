@@ -40,15 +40,15 @@ func (s *signUpValidation) Validate(input *user_usecase.SignupInputDto) *infra_e
 	return nil
 }
 
-func (s *signUpValidation) alreadyExists(name string) *infra_errors.CustomError {
-	exists, err := s.userRepository.GetByUsername(name)
+func (s *signUpValidation) alreadyExists(email string) *infra_errors.CustomError {
+	exists, err := s.userRepository.GetByEmail(email)
 
 	if err != nil {
 		return infra_errors.NewCustomError(err, http.StatusInternalServerError, "")
 	}
 
 	if exists != nil {
-		return infra_errors.NewCustomError(infra_errors.AlreadyExists("user"), http.StatusBadRequest, "username")
+		return infra_errors.NewCustomError(infra_errors.AlreadyExists("user"), http.StatusBadRequest, "email")
 	}
 
 	return nil

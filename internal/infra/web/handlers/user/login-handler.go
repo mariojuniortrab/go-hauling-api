@@ -39,7 +39,7 @@ func (h *loginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.loginUseCase.GetByUsername(&input)
+	user, err := h.loginUseCase.GetByEmail(&input)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err)

@@ -12,7 +12,7 @@ type LoginValidation interface {
 }
 
 type LoginInputDto struct {
-	Username string `validate:"required" json:"username"`
+	Email    string `validate:"required,email" json:"email"`
 	Password string `validate:"required" json:"password"`
 }
 
@@ -21,17 +21,15 @@ type UserDto struct {
 	Name     string
 	Active   bool
 	Email    string
-	Username string
 	Password string
 }
 
 type LoginOutputDto struct {
-	Token    string `json:"token"`
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Active   bool   `json:"active"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	Token  string `json:"token"`
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Active bool   `json:"active"`
+	Email  string `json:"email"`
 }
 
 type Login struct {
@@ -54,26 +52,24 @@ func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
 	}
 
 	return &LoginOutputDto{
-		Token:    token,
-		ID:       input.ID,
-		Name:     input.Name,
-		Active:   input.Active,
-		Email:    input.Email,
-		Username: input.Username,
+		Token:  token,
+		ID:     input.ID,
+		Name:   input.Name,
+		Active: input.Active,
+		Email:  input.Email,
 	}, nil
 }
 
-func (u *Login) GetByUsername(input *LoginInputDto) (*UserDto, error) {
-	user, err := u.userRepository.GetByUsername(input.Username)
+func (u *Login) GetByEmail(input *LoginInputDto) (*UserDto, error) {
+	user, err := u.userRepository.GetByEmail(input.Email)
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserDto{
-		ID:       user.ID,
-		Name:     user.Name,
-		Active:   user.Active,
-		Email:    user.Email,
-		Username: user.Username,
+		ID:     user.ID,
+		Name:   user.Name,
+		Active: user.Active,
+		Email:  user.Email,
 	}, nil
 }

@@ -15,8 +15,8 @@ func NewRepositoryMysql(db *sql.DB) *userRepositoryMysql {
 }
 
 func (r *userRepositoryMysql) Create(user *user_entity.User) error {
-	_, err := r.DB.Exec("INSERT INTO users (id, name, username, password, active) VALUES (?,?)",
-		user.ID, user.Name, user.Username, user.Password, user.Active)
+	_, err := r.DB.Exec("INSERT INTO users (id, name, email, password, active, birth) VALUES (?,?)",
+		user.ID, user.Name, user.Email, user.Password, user.Active, user.Birth)
 
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (r *userRepositoryMysql) Create(user *user_entity.User) error {
 func (r *userRepositoryMysql) ListAll() ([]*user_entity.User, error) {
 	var result []*user_entity.User
 
-	rows, err := r.DB.Query("SELECT id, name, username, active FROM users")
+	rows, err := r.DB.Query("SELECT * FROM users")
 
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (r *userRepositoryMysql) ListAll() ([]*user_entity.User, error) {
 	for rows.Next() {
 		var user user_entity.User
 
-		err = rows.Scan(&user.ID, &user.Name, &user.Username, &user.Active)
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Active)
 		if err != nil {
 			return nil, err
 		}
@@ -53,8 +53,8 @@ func (r *userRepositoryMysql) ListAll() ([]*user_entity.User, error) {
 func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 	var user user_entity.User
 
-	err := r.DB.QueryRow("SELECT id, name, username, active FROM brands WHERE id = ?", id).
-		Scan(&user.ID, &user.Name, &user.Username, &user.Active)
+	err := r.DB.QueryRow("SELECT id, name, email, active FROM brands WHERE id = ?", id).
+		Scan(&user.ID, &user.Name, &user.Email, &user.Active)
 
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
@@ -64,11 +64,11 @@ func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 
 }
 
-func (r *userRepositoryMysql) GetByUsername(username string) (*user_entity.User, error) {
+func (r *userRepositoryMysql) GetByEmail(email string) (*user_entity.User, error) {
 	var user user_entity.User
 
-	row := r.DB.QueryRow("SELECT id, username, name, password FROM users WHERE username = ?", username)
-	err := row.Scan(&user.ID, &user.Name)
+	row := r.DB.QueryRow("SELECT id, email, name, password FROM users WHERE email = ?", email)
+	err := row.Scan(&user.ID, &user.Name, &user.Email)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -81,10 +81,10 @@ func (r *userRepositoryMysql) GetByUsername(username string) (*user_entity.User,
 	return &user, nil
 }
 
-func (r *userRepositoryMysql) Login(username, password string) (*user_entity.User, error) {
+func (r *userRepositoryMysql) Login(email, password string) (*user_entity.User, error) {
 	var user user_entity.User
 
-	row := r.DB.QueryRow("SELECT id, username, name, password FROM users WHERE username = ? AND password = ?", username, password)
+	row := r.DB.QueryRow("SELECT id, email, name, password FROM users WHERE email = ? AND password = ?", email, password)
 	err := row.Scan(&user.ID, &user.Name)
 
 	if err != nil {

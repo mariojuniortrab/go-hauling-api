@@ -13,7 +13,6 @@ type SignupValidation interface {
 }
 
 type SignupInputDto struct {
-	Username             string `validate:"required,alphanumunicode" json:"username"`
 	Password             string `validate:"required,eqfield=PasswordConfirmation" json:"password"`
 	Name                 string `validate:"required" json:"name"`
 	PasswordConfirmation string `validate:"required" json:"password_confirmation"`
@@ -22,9 +21,9 @@ type SignupInputDto struct {
 }
 
 type signupOutputDto struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
 type Signup struct {
@@ -51,8 +50,7 @@ func (s *Signup) Execute(input SignupInputDto) (*signupOutputDto, error) {
 		return nil, err
 	}
 
-	user := user_entity.NewUser(
-		input.Username, input.Name, hashPassword, input.Email, formattedDate)
+	user := user_entity.NewUser(input.Name, hashPassword, input.Email, formattedDate)
 
 	err = s.userRepository.Create(user)
 	if err != nil {
@@ -60,9 +58,9 @@ func (s *Signup) Execute(input SignupInputDto) (*signupOutputDto, error) {
 	}
 
 	return &signupOutputDto{
-		Username: user.Username,
-		Name:     user.Name,
-		ID:       user.ID,
+		Email: user.Email,
+		Name:  user.Name,
+		ID:    user.ID,
 	}, nil
 }
 

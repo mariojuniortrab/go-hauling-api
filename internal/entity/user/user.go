@@ -7,14 +7,13 @@ import (
 )
 
 type UserRepository interface {
-	Create(user *User) error
-	GetByUsername(username string) (*User, error)
-	Login(username, password string) (*User, error)
+	Create(*User) error
+	GetByEmail(string) (*User, error)
+	Login(string, string) (*User, error)
 }
 
 type User struct {
 	ID       string
-	Username string
 	Name     string
 	Password string
 	Active   bool
@@ -22,11 +21,10 @@ type User struct {
 	Birth    time.Time
 }
 
-func NewUser(username, name, password, email string, birth time.Time) *User {
+func NewUser(name, password, email string, birth time.Time) *User {
 
 	return &User{
 		ID:       uuid.New().String(),
-		Username: username,
 		Name:     name,
 		Password: password,
 		Active:   true,
