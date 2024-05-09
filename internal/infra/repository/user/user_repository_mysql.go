@@ -80,3 +80,20 @@ func (r *userRepositoryMysql) GetByUsername(username string) (*user_entity.User,
 
 	return &user, nil
 }
+
+func (r *userRepositoryMysql) Login(username, password string) (*user_entity.User, error) {
+	var user user_entity.User
+
+	row := r.DB.QueryRow("SELECT id, username, name, password FROM users WHERE username = ? AND password = ?", username, password)
+	err := row.Scan(&user.ID, &user.Name)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &user, nil
+}

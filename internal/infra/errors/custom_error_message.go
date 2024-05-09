@@ -1,6 +1,7 @@
 package infra_errors
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -19,4 +20,16 @@ func MustBeUUID(field string) error {
 
 func MustMatch(field1, field2 string) error {
 	return fmt.Errorf("%s does not match %s", strings.ToLower(field1), strings.ToLower(field2))
+}
+
+func IsInvalid(field1 string) error {
+	return fmt.Errorf("%s is invalid", strings.ToLower(field1))
+}
+
+func UserNotFound() error {
+	return WrongPassword()
+}
+
+func WrongPassword() error {
+	return errors.New("user not found / wrong password")
 }

@@ -7,6 +7,8 @@ import (
 
 	brand_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/brand"
 	user_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/user"
+	infra_util "github.com/mariojuniortrab/hauling-api/internal/infra/util"
+	infra_validation "github.com/mariojuniortrab/hauling-api/internal/infra/validation"
 	"github.com/mariojuniortrab/hauling-api/internal/infra/web/routes"
 	brand_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/routes/brand"
 	user_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/routes/user"
@@ -21,13 +23,17 @@ func main() {
 	}
 	defer db.Close()
 
+	validator := infra_validation.NewValidator()
+	encrypter := infra_util.NewBcryptAdapter()
+	tokenizer := infra_util.NewJwtAdapter()
+
 	//Repositories
 	brandRepository := brand_repository.NewRepositoryMysql(db)
 	userRepository := user_repository.NewRepositoryMysql(db)
 
 	//Routes
 	brandRouter := brand_routes.NewRouter(brandRepository)
-	userRouter := user_routes.NewRouter(userRepository)
+	userRouter := user_routes.NewRouter(userRepository, validator, encrypter, tokenizer)
 
 	//Using chi with an adapter to manege routes
 	r := routes.NewChiRouteAdapter()

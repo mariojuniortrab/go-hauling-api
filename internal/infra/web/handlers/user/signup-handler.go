@@ -8,19 +8,20 @@ import (
 )
 
 type signupHandler struct {
-	signUpValidation user_usecase.SignUpValidation
-	signUpUseCase    *user_usecase.SignUpUseCase
+	signUpValidation user_usecase.SignupValidation
+	signUp           *user_usecase.Signup
 }
 
-func NewSignupHandler(signUpValidation user_usecase.SignUpValidation, signUpUseCase *user_usecase.SignUpUseCase) *signupHandler {
+func NewSignupHandler(signUpValidation user_usecase.SignupValidation,
+	signUp *user_usecase.Signup) *signupHandler {
 	return &signupHandler{
 		signUpValidation: signUpValidation,
-		signUpUseCase:    signUpUseCase,
+		signUp:           signUp,
 	}
 }
 
-func (s *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var input user_usecase.SignUpInputDto
+func (h *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	var input user_usecase.SignupInputDto
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -31,14 +32,14 @@ func (s *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validationErr := s.signUpValidation.Validate(input)
+	validationErr := h.signUpValidation.Validate(&input)
 	if validationErr != nil {
 		w.WriteHeader(validationErr.StatusCode)
 		json.NewEncoder(w).Encode(validationErr)
 		return
 	}
 
-	output, err := s.signUpUseCase.Execute(input)
+	output, err := h.signUp.Execute(input)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err)

@@ -7,8 +7,15 @@ import (
 )
 
 func ValidationErrorAdapter(v validator.FieldError) error {
-	if v.Tag() == "required" {
+	switch {
+	case v.Tag() == "required":
 		return IsRequired(v.Field())
+	case v.Tag() == "eqfield":
+		return IsInvalid(v.Field())
+	case v.Tag() == "alphanumunicode":
+		return IsInvalid(v.Field())
+	case v.Tag() == "email":
+		return IsInvalid(v.Field())
 	}
 
 	return errors.New("unknown error")

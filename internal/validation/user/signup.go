@@ -14,14 +14,14 @@ type signUpValidation struct {
 	userRepository user_entity.UserRepository
 }
 
-func NewSignUpValidator(validator validation.Validator, userRepository user_entity.UserRepository) *signUpValidation {
+func NewSignUpValidation(validator validation.Validator, userRepository user_entity.UserRepository) *signUpValidation {
 	return &signUpValidation{
 		validator,
 		userRepository,
 	}
 }
 
-func (s *signUpValidation) Validate(input user_usecase.SignUpInputDto) *infra_errors.CustomError {
+func (s *signUpValidation) Validate(input *user_usecase.SignupInputDto) *infra_errors.CustomError {
 	err := s.validator.Validate(input)
 	if err != nil {
 		return err
