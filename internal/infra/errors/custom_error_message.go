@@ -41,7 +41,11 @@ func MustBeString(field string) error {
 	return fmt.Errorf("%s must be a string", field)
 }
 
-func LengthMustBeLess(field string, length int) error {
+func LengthMustBe(field string, length int) error {
+	return fmt.Errorf("length of field %s must be %d", field, length)
+}
+
+func LengthMustBeOrLess(field string, length int) error {
 	return fmt.Errorf("length of field %s must be %d or less", field, length)
 }
 

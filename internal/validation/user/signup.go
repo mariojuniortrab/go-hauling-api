@@ -1,7 +1,6 @@
 package user_validation
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -31,7 +30,7 @@ func (s *signUpValidation) Validate(input *user_usecase.SignupInputDto) *infra_e
 	s.validatePasswordConfirmation(input.PasswordConfirmation, input.Password)
 
 	if s.validator.HasErrors() {
-		return s.validator.GetErrors()
+		return s.validator.GetErrorsAndClean()
 	}
 
 	err := s.alreadyExists(input.Email, "")
@@ -45,14 +44,12 @@ func (s *signUpValidation) Validate(input *user_usecase.SignupInputDto) *infra_e
 func (s *signUpValidation) alreadyExists(email, id string) *infra_errors.CustomError {
 	exists, err := s.userRepository.GetByEmail(email, id)
 
-	fmt.Println("exists", exists)
-
 	if err != nil {
 		return infra_errors.NewCustomError(err, http.StatusInternalServerError, "")
 	}
 
 	if exists != nil {
-		return infra_errors.NewCustomError(infra_errors.AlreadyExists("user"), http.StatusBadRequest, "email")
+		return infra_errors.NewCustomError(infra_errors.AlreadyExists("user"), http.StatusConflict, "email")
 	}
 
 	return nil
@@ -63,7 +60,7 @@ func (s *signUpValidation) validateEmail(input string) {
 
 	s.validator.
 		ValidateRequiredField(input, fieldName).
-		ValidateFieldLength(input, fieldName, 50).
+		ValidateFieldMaxLength(input, fieldName, 50).
 		ValidateEmailField(input, fieldName)
 }
 
@@ -73,7 +70,7 @@ func (s *signUpValidation) validatePassword(input string) {
 	s.validator.
 		ValidateRequiredField(input, fieldName).
 		ValidateFieldString(input, fieldName).
-		ValidateFieldLength(input, fieldName, 50)
+		ValidateFieldMaxLength(input, fieldName, 50)
 }
 
 func (s *signUpValidation) validateName(input string) {
@@ -81,8 +78,7 @@ func (s *signUpValidation) validateName(input string) {
 
 	s.validator.
 		ValidateRequiredField(input, fieldName).
-		ValidateFieldString(input, fieldName).
-		ValidateFieldLength(input, fieldName, 50)
+		ValidateFieldMaxLength(input, fieldName, 255)
 }
 
 func (s *signUpValidation) validateBirth(input string) {
@@ -95,7 +91,6 @@ func (s *signUpValidation) validateBirth(input string) {
 	if err != nil {
 		s.validator.AddError(infra_errors.MustBeDateFormat(fieldName), fieldName)
 	}
-
 }
 
 func (s *signUpValidation) validatePasswordConfirmation(input, password string) {
@@ -104,6 +99,6 @@ func (s *signUpValidation) validatePasswordConfirmation(input, password string) 
 	s.validator.
 		ValidateRequiredField(input, fieldName).
 		ValidateFieldString(input, fieldName).
-		ValidateFieldLength(input, fieldName, 50).
+		ValidateFieldMaxLength(input, fieldName, 50).
 		ValidatePasswordConfirmationEquals(input, password)
 }

@@ -33,12 +33,20 @@ func (v *validatorAdapter) GetErrors() *infra_errors.CustomError {
 	return infra_errors.NewCustomErrorArray(v.errors, http.StatusBadRequest)
 }
 
+func (v *validatorAdapter) GetErrorsAndClean() *infra_errors.CustomError {
+	errors := v.errors
+
+	v.errors = []*infra_errors.CustomErrorMessage{}
+
+	return infra_errors.NewCustomErrorArray(errors, http.StatusBadRequest)
+}
+
 func (v *validatorAdapter) ValidateRequiredField(f interface{}, fieldName string) validation.Validator {
 	return v.defaultValidation(f, fieldName, "required", infra_errors.IsRequired)
 }
 
 func (v *validatorAdapter) ValidateEmailField(f interface{}, fieldName string) validation.Validator {
-	return v.defaultValidation(f, fieldName, "email", infra_errors.IsInvalid)
+	return v.defaultValidation(f, fieldName, "omitempty,email", infra_errors.IsInvalid)
 }
 
 func (v *validatorAdapter) ValidatePasswordConfirmationEquals(password, passwordConfirmation string) validation.Validator {
@@ -47,15 +55,22 @@ func (v *validatorAdapter) ValidatePasswordConfirmationEquals(password, password
 }
 
 func (v *validatorAdapter) ValidateFieldString(f interface{}, fieldName string) validation.Validator {
-	return v.defaultValidation(f, fieldName, "alphanumeric", infra_errors.MustBeString)
+	return v.defaultValidation(f, fieldName, "omitempty,alphaunicode", infra_errors.MustBeString)
 }
 
 func (v *validatorAdapter) ValidateFieldLength(f interface{}, fieldName string, length int) validation.Validator {
-	flag := fmt.Sprintf("len=%d", length)
+	return v.defaultLenghValidation(f, fieldName, fmt.Sprintf("omitempty,len=%d", length), infra_errors.LengthMustBe(fieldName, length))
+}
+
+func (v *validatorAdapter) ValidateFieldMaxLength(f interface{}, fieldName string, length int) validation.Validator {
+	return v.defaultLenghValidation(f, fieldName, fmt.Sprintf("omitempty,max=%d", length), infra_errors.LengthMustBeOrLess(fieldName, length))
+}
+
+func (v *validatorAdapter) defaultLenghValidation(f interface{}, fieldName, flag string, errMessage error) validation.Validator {
 	err := v.validator.Var(f, flag)
 
 	if err != nil {
-		v.errors = append(v.errors, infra_errors.NewCustomErrorMessage(infra_errors.LengthMustBeLess(fieldName, length), fieldName))
+		v.errors = append(v.errors, infra_errors.NewCustomErrorMessage(errMessage, fieldName))
 	}
 
 	return v

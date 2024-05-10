@@ -8,7 +8,9 @@ type Validator interface {
 	ValidatePasswordConfirmationEquals(string, string) Validator
 	ValidateFieldString(interface{}, string) Validator
 	ValidateFieldLength(interface{}, string, int) Validator
+	ValidateFieldMaxLength(interface{}, string, int) Validator
 	HasErrors() bool
 	AddError(error, string) Validator
 	GetErrors() *infra_errors.CustomError
+	GetErrorsAndClean() *infra_errors.CustomError
 }
