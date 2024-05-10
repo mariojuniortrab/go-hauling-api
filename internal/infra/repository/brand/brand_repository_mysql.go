@@ -3,7 +3,7 @@ package brand_repository
 import (
 	"database/sql"
 
-	brand_entity "github.com/mariojuniortrab/hauling-api/internal/entity/brand"
+	brand_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/brand"
 )
 
 type BrandRepositoryMysql struct {

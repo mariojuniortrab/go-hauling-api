@@ -3,7 +3,7 @@ package user_repository
 import (
 	"database/sql"
 
-	user_entity "github.com/mariojuniortrab/hauling-api/internal/entity/user"
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 )
 
 type userRepositoryMysql struct {
