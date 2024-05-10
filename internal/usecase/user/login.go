@@ -12,8 +12,8 @@ type LoginValidation interface {
 }
 
 type LoginInputDto struct {
-	Email    string `validate:"required,email" json:"email"`
-	Password string `validate:"required" json:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type UserDto struct {
@@ -61,7 +61,7 @@ func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
 }
 
 func (u *Login) GetByEmail(input *LoginInputDto) (*UserDto, error) {
-	user, err := u.userRepository.GetByEmail(input.Email)
+	user, err := u.userRepository.GetByEmail(input.Email, "")
 	if err != nil {
 		return nil, err
 	}

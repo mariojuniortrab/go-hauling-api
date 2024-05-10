@@ -8,7 +8,7 @@ import (
 
 type UserRepository interface {
 	Create(*User) error
-	GetByEmail(string) (*User, error)
+	GetByEmail(string, string) (*User, error)
 	Login(string, string) (*User, error)
 }
 

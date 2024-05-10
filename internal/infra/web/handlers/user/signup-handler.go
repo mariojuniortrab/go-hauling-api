@@ -2,6 +2,7 @@ package user_handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/usecase/user"
@@ -39,6 +40,7 @@ func (h *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("input: ", input)
 	output, err := h.signUp.Execute(input)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -20,10 +20,6 @@ func NewLoginValidation(validator validation.Validator,
 }
 
 func (v *loginValidation) Validate(input *user_usecase.LoginInputDto) *infra_errors.CustomError {
-	err := v.validator.Validate(input)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

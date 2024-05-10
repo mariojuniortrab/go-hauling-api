@@ -13,11 +13,11 @@ type SignupValidation interface {
 }
 
 type SignupInputDto struct {
-	Password             string `validate:"required,eqfield=PasswordConfirmation" json:"password"`
-	Name                 string `validate:"required" json:"name"`
-	PasswordConfirmation string `validate:"required" json:"password_confirmation"`
-	Email                string `validate:"required,email" json:"email"`
-	Birth                string `validate:"required" json:"birth"`
+	Password             string `json:"password"`
+	Name                 string `json:"name"`
+	PasswordConfirmation string `json:"passwordConfirmation"`
+	Email                string `json:"email"`
+	Birth                string `json:"birth"`
 }
 
 type signupOutputDto struct {
@@ -65,7 +65,8 @@ func (s *Signup) Execute(input SignupInputDto) (*signupOutputDto, error) {
 }
 
 func getFormattedDate(date string) (time.Time, error) {
-	const shortForm = "2006-Jan-02"
+	const shortForm = "2006-01-02"
+
 	result, err := time.Parse(shortForm, date)
 
 	return result, err

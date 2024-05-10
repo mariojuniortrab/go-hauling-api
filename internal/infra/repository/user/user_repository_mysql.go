@@ -15,7 +15,9 @@ func NewRepositoryMysql(db *sql.DB) *userRepositoryMysql {
 }
 
 func (r *userRepositoryMysql) Create(user *user_entity.User) error {
-	_, err := r.DB.Exec("INSERT INTO users (id, name, email, password, active, birth) VALUES (?,?)",
+	query := "INSERT INTO users (id, name, email, password, active, birth) VALUES (?,?,?,?,?,?)"
+
+	_, err := r.DB.Exec(query,
 		user.ID, user.Name, user.Email, user.Password, user.Active, user.Birth)
 
 	if err != nil {
@@ -64,11 +66,20 @@ func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 
 }
 
-func (r *userRepositoryMysql) GetByEmail(email string) (*user_entity.User, error) {
+func (r *userRepositoryMysql) GetByEmail(email string, id string) (*user_entity.User, error) {
 	var user user_entity.User
+	var query string
+	var row *sql.Row
 
-	row := r.DB.QueryRow("SELECT id, email, name, password FROM users WHERE email = ?", email)
-	err := row.Scan(&user.ID, &user.Name, &user.Email)
+	if id != "" {
+		query = "SELECT id, email, name, password FROM users WHERE email = ? AND id <> ?"
+		row = r.DB.QueryRow(query, email, id)
+	} else {
+		query = "SELECT id, email, name, password FROM users WHERE email = ?"
+		row = r.DB.QueryRow(query, email)
+	}
+
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

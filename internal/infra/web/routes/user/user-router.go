@@ -34,8 +34,8 @@ func (r *router) Route(route routes.Router) routes.Router {
 	signupHandler := r.getSignupHandler()
 	loginHandler := r.getLoginHandler()
 
-	route.Post("signup", signupHandler.Handle)
-	route.Post("login", loginHandler.Handle)
+	route.Post("/signup", signupHandler.Handle)
+	route.Post("/login", loginHandler.Handle)
 
 	return route
 }
