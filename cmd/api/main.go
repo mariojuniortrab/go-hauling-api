@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
+	infra_adapters "github.com/mariojuniortrab/hauling-api/internal/infra/adapters"
 	brand_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/brand"
 	user_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/user"
-	infra_util "github.com/mariojuniortrab/hauling-api/internal/infra/util"
-	infra_validation "github.com/mariojuniortrab/hauling-api/internal/infra/validation"
-	"github.com/mariojuniortrab/hauling-api/internal/infra/web/routes"
-	brand_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/routes/brand"
-	user_routes "github.com/mariojuniortrab/hauling-api/internal/infra/web/routes/user"
-
-	_ "github.com/go-sql-driver/mysql"
+	brand_routes "github.com/mariojuniortrab/hauling-api/internal/presentation/web/route/brand"
+	user_routes "github.com/mariojuniortrab/hauling-api/internal/presentation/web/route/user"
 )
 
 func main() {
@@ -23,9 +20,9 @@ func main() {
 	}
 	defer db.Close()
 
-	validator := infra_validation.NewValidator()
-	encrypter := infra_util.NewBcryptAdapter()
-	tokenizer := infra_util.NewJwtAdapter()
+	validator := infra_adapters.NewValidator()
+	encrypter := infra_adapters.NewBcryptAdapter()
+	tokenizer := infra_adapters.NewJwtAdapter()
 
 	//Repositories
 	brandRepository := brand_repository.NewRepositoryMysql(db)
@@ -35,8 +32,8 @@ func main() {
 	brandRouter := brand_routes.NewRouter(brandRepository)
 	userRouter := user_routes.NewRouter(userRepository, validator, encrypter, tokenizer)
 
-	//Using chi with an adapter to manege routes
-	r := routes.NewChiRouteAdapter()
+	//Using chi with an adapter to manage routes
+	r := infra_adapters.NewChiRouteAdapter()
 
 	//routing
 	brandRouter.Route(r)

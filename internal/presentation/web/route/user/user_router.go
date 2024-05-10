@@ -6,7 +6,6 @@ import (
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
-	"github.com/mariojuniortrab/hauling-api/internal/infra/web/routes"
 	user_handler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/handler/user"
 	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 )
@@ -30,7 +29,7 @@ func NewRouter(userRepository user_entity.UserRepository,
 	}
 }
 
-func (r *router) Route(route routes.Router) web_protocol.Router {
+func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	signupHandler := r.getSignupHandler()
 	loginHandler := r.getLoginHandler()
 

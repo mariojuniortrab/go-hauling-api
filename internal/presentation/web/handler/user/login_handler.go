@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/usecase/user"
+	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
+	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
 )
 
 type loginHandler struct {
-	loginValidation user_usecase.LoginValidation
+	loginValidation user_validation.LoginValidation
 	loginUseCase    *user_usecase.Login
 }
 
-func NewLoginHandle(loginValidation user_usecase.LoginValidation,
+func NewLoginHandle(loginValidation user_validation.LoginValidation,
 	loginUseCase *user_usecase.Login) *loginHandler {
 	return &loginHandler{
 		loginValidation,

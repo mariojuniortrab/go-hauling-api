@@ -9,6 +9,10 @@ import (
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
+type SignupValidation interface {
+	Validate(input *user_usecase.SignupInputDto) []*errors_validation.CustomErrorMessage
+	AlreadyExists(email, id string) (*errors_validation.CustomErrorMessage, error)
+}
 type signUpValidation struct {
 	validator      protocol_validation.Validator
 	userRepository user_entity.UserRepository

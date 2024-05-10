@@ -7,6 +7,11 @@ import (
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
+type LoginValidation interface {
+	Validate(input *user_usecase.LoginInputDto) []*errors_validation.CustomErrorMessage
+	ValidateCredentials(input *user_usecase.UserDto, password string) *errors_validation.CustomErrorMessage
+}
+
 type loginValidation struct {
 	validator protocol_validation.Validator
 	encrypter protocol_usecase.Encrypter
