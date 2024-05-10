@@ -40,7 +40,7 @@ func main() {
 	userRouter.Route(r)
 
 	//starting server
-	fmt.Println("Server has started")
 	http.ListenAndServe(":8000", r)
+	fmt.Println("Server has started")
 
 }

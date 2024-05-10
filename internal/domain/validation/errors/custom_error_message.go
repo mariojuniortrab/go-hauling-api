@@ -52,3 +52,7 @@ func LengthMustBeOrLess(field string, length int) error {
 func MustBeDateFormat(field string) error {
 	return fmt.Errorf("%s must be YYYY-MM-DD format", field)
 }
+
+func InternalServerError() error {
+	return errors.New("internal server error")
+}
