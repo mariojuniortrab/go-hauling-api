@@ -49,6 +49,10 @@ func LengthMustBeOrLess(field string, length int) error {
 	return fmt.Errorf("length of field %s must be %d or less", field, length)
 }
 
+func LengthMustBeAtLeast(field string, length int) error {
+	return fmt.Errorf("length of field %s must be at least %d", field, length)
+}
+
 func MustBeDateFormat(field string) error {
 	return fmt.Errorf("%s must be YYYY-MM-DD format", field)
 }

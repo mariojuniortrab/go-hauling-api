@@ -53,7 +53,7 @@ func (v *validatorAdapter) ValidatePasswordConfirmationEquals(password, password
 }
 
 func (v *validatorAdapter) ValidateFieldString(f interface{}, fieldName string) protocol_validation.Validator {
-	return v.defaultValidation(f, fieldName, "omitempty,alphaunicode", errors_validation.MustBeString)
+	return v.defaultValidation(f, fieldName, "omitempty,alphanumunicode", errors_validation.MustBeString)
 }
 
 func (v *validatorAdapter) ValidateFieldLength(f interface{}, fieldName string, length int) protocol_validation.Validator {
@@ -62,6 +62,10 @@ func (v *validatorAdapter) ValidateFieldLength(f interface{}, fieldName string, 
 
 func (v *validatorAdapter) ValidateFieldMaxLength(f interface{}, fieldName string, length int) protocol_validation.Validator {
 	return v.defaultLenghValidation(f, fieldName, fmt.Sprintf("omitempty,max=%d", length), errors_validation.LengthMustBeOrLess(fieldName, length))
+}
+
+func (v *validatorAdapter) ValidateFieldMinLength(f interface{}, fieldName string, length int) protocol_validation.Validator {
+	return v.defaultLenghValidation(f, fieldName, fmt.Sprintf("omitempty,min=%d", length), errors_validation.LengthMustBeAtLeast(fieldName, length))
 }
 
 func (v *validatorAdapter) defaultLenghValidation(f interface{}, fieldName, flag string, errMessage error) protocol_validation.Validator {

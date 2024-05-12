@@ -2,10 +2,12 @@ package user_handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
+	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-menager"
 )
 
 type loginHandler struct {
@@ -26,41 +28,41 @@ func (h *loginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	responseManager := web_response_manager.NewResponseManager(w)
+
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err)
+		responseManager.RespondInternalServerError(err)
 		return
 	}
 
-	validationErr := h.loginValidation.Validate(&input)
-	if validationErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(validationErr)
+	validationErrs := h.loginValidation.Validate(&input)
+	if validationErrs != nil {
+		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
 		return
 	}
 
 	user, err := h.loginUseCase.GetByEmail(&input)
+	fmt.Println("user found:", user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err)
+		responseManager.RespondInternalServerError(err)
+		return
+	}
+	if user == nil {
+		responseManager.RespondLoginInvalid()
 		return
 	}
 
-	credentialErr := h.loginValidation.ValidateCredentials(user, input.Password)
-	if credentialErr != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(credentialErr)
+	if h.loginValidation.IsCredentialInvalid(user, input.Password) {
+		responseManager.RespondLoginInvalid()
 		return
 	}
 
 	output, err := h.loginUseCase.Execute(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err)
+		responseManager.RespondInternalServerError(err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(output)
+	responseManager.SetStatusOk().SetMessage("login successful").SetData(output).Respond()
 }

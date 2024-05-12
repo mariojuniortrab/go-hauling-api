@@ -10,8 +10,10 @@ import (
 
 type ResponseManager interface {
 	SetStatusCreated() ResponseManager
+	SetStatusOk() ResponseManager
 	SetBadRequestStatus() ResponseManager
 	SetConflictStatus() ResponseManager
+	SetInternalServerErrorStatus() ResponseManager
 	AddError(err *errors_validation.CustomErrorMessage) ResponseManager
 	AddErrors(errs []*errors_validation.CustomErrorMessage) ResponseManager
 	SetMessage(message string) ResponseManager
@@ -48,12 +50,20 @@ func (r *responseManager) SetStatusCreated() ResponseManager {
 	return r.setStatusCode(http.StatusCreated)
 }
 
+func (r *responseManager) SetStatusOk() ResponseManager {
+	return r.setStatusCode(http.StatusOK)
+}
+
 func (r *responseManager) SetBadRequestStatus() ResponseManager {
 	return r.setStatusCode(http.StatusBadRequest)
 }
 
 func (r *responseManager) SetConflictStatus() ResponseManager {
-	return r.setStatusCode(http.StatusBadRequest)
+	return r.setStatusCode(http.StatusConflict)
+}
+
+func (r *responseManager) SetInternalServerErrorStatus() ResponseManager {
+	return r.setStatusCode(http.StatusInternalServerError)
 }
 
 func (r *responseManager) setStatusCode(statusCode int) ResponseManager {
@@ -86,16 +96,26 @@ func (r *responseManager) Respond() {
 
 	switch {
 	case r.statusCode == http.StatusCreated:
+		json.NewEncoder(r.w).Encode(&messageSucessful{Message: r.message, Data: r.data})
+		return
 	case r.statusCode == http.StatusOK:
 		json.NewEncoder(r.w).Encode(&messageSucessful{Message: r.message, Data: r.data})
 		return
 	default:
 		json.NewEncoder(r.w).Encode(&messageFieldError{Errors: r.errors})
+		return
 	}
 }
 
 func (r *responseManager) RespondInternalServerError(err error) {
-	r.w.WriteHeader(http.StatusInternalServerError)
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.InternalServerError(), "")
+	r.SetInternalServerErrorStatus().AddError(errorMessage)
 	log.Println(err)
-	json.NewEncoder(r.w).Encode(errors_validation.InternalServerError())
+	r.Respond()
+}
+
+func (r *responseManager) RespondLoginInvalid() {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UserNotFound(), "")
+	r.SetBadRequestStatus().AddError(errorMessage)
+	r.Respond()
 }

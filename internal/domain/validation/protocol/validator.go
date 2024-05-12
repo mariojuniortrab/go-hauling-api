@@ -11,6 +11,7 @@ type Validator interface {
 	ValidateFieldString(interface{}, string) Validator
 	ValidateFieldLength(interface{}, string, int) Validator
 	ValidateFieldMaxLength(interface{}, string, int) Validator
+	ValidateFieldMinLength(interface{}, string, int) Validator
 	HasErrors() bool
 	AddError(error, string) Validator
 	GetErrors() []*errors_validation.CustomErrorMessage

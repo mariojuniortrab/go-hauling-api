@@ -41,6 +41,7 @@ func NewLoginUseCase(userRepository user_entity.UserRepository,
 
 func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
 	token, err := u.tokenizer.GenerateToken(input.ID, input.Email)
+
 	if err != nil {
 		return nil, err
 	}
@@ -56,14 +57,20 @@ func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
 
 func (u *Login) GetByEmail(input *LoginInputDto) (*UserDto, error) {
 	user, err := u.userRepository.GetByEmail(input.Email, "")
+
 	if err != nil {
 		return nil, err
 	}
 
+	if user == nil {
+		return nil, nil
+	}
+
 	return &UserDto{
-		ID:     user.ID,
-		Name:   user.Name,
-		Active: user.Active,
-		Email:  user.Email,
+		ID:       user.ID,
+		Name:     user.Name,
+		Active:   user.Active,
+		Email:    user.Email,
+		Password: user.Password,
 	}, nil
 }

@@ -1,6 +1,8 @@
 package infra_adapters
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"golang.org/x/crypto/bcrypt"
+)
 
 type BcryptAdapter struct{}
 
@@ -13,7 +15,7 @@ func (b *BcryptAdapter) Hash(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (b *BcryptAdapter) CheckPasswordHash(password, hash string) bool {
+func (b *BcryptAdapter) CheckPasswordHash(hash, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

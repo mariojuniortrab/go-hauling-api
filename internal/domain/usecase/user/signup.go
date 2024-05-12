@@ -19,6 +19,7 @@ type signupOutputDto struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name"`
+	Birth string `json:"birth"`
 }
 
 type Signup struct {
@@ -56,6 +57,7 @@ func (s *Signup) Execute(input SignupInputDto) (*signupOutputDto, error) {
 		Email: user.Email,
 		Name:  user.Name,
 		ID:    user.ID,
+		Birth: getStringDate(user.Birth),
 	}, nil
 }
 
@@ -65,4 +67,9 @@ func getFormattedDate(date string) (time.Time, error) {
 	result, err := time.Parse(shortForm, date)
 
 	return result, err
+}
+
+func getStringDate(date time.Time) string {
+	const shortForm = "2006-01-02"
+	return date.Format(shortForm)
 }

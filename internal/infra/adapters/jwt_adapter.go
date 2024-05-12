@@ -21,5 +21,5 @@ func (j *jwtAdapter) GenerateToken(id string, email string) (string, error) {
 		"exp":   time.Now().Add(time.Hour + 1).Unix(),
 	})
 
-	return token.SignedString(secretKey)
+	return token.SignedString([]byte(secretKey))
 }
