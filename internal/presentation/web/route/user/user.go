@@ -36,12 +36,14 @@ func NewRouter(userRepository user_entity.UserRepository,
 func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	signupHandler := r.getSignupHandler()
 	loginHandler := r.getLoginHandler()
+	authUseCase := user_usecase.NewAuthorization(r.tokenizer)
+	protected := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase)
+	list := web_middleware.NewListMiddleware(r.validator)
 
 	route.Group(func(rr web_protocol.Router) {
-		authUseCase := user_usecase.NewAuthorization(r.tokenizer)
-		protected := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase)
 
 		rr.Use(protected.GetMiddleware())
+		rr.Use(list.GetMiddleware())
 
 		rr.Get("/user", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)

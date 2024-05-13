@@ -67,7 +67,7 @@ func (v *signUpValidation) validatePassword(input string) {
 
 	v.validator.
 		ValidateRequiredField(input, fieldName).
-		ValidateFieldString(input, fieldName).
+		ValidateStringField(input, fieldName).
 		ValidateFieldMaxLength(input, fieldName, 50).
 		ValidateFieldMinLength(input, fieldName, 8)
 }
@@ -97,7 +97,7 @@ func (v *signUpValidation) validatePasswordConfirmation(input, password string) 
 
 	v.validator.
 		ValidateRequiredField(input, fieldName).
-		ValidateFieldString(input, fieldName).
+		ValidateStringField(input, fieldName).
 		ValidateFieldMaxLength(input, fieldName, 50).
 		ValidatePasswordConfirmationEquals(input, password)
 }

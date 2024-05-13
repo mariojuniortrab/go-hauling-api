@@ -44,6 +44,7 @@ type responseManager struct {
 }
 
 func NewResponseManager(w http.ResponseWriter) *responseManager {
+	w.Header().Set("Content-Type", "application/json")
 	return &responseManager{
 		w:          w,
 		statusCode: 200,

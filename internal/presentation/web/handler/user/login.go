@@ -25,8 +25,6 @@ func NewLoginHandle(loginValidation user_validation.LoginValidation,
 func (h *loginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var input user_usecase.LoginInputDto
 
-	w.Header().Set("Content-Type", "application/json")
-
 	responseManager := web_response_manager.NewResponseManager(w)
 
 	err := json.NewDecoder(r.Body).Decode(&input)

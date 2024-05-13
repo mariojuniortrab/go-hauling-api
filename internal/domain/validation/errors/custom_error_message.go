@@ -64,3 +64,11 @@ func InternalServerError() error {
 func Unauthorized() error {
 	return errors.New("unauthorized")
 }
+
+func URLQueryFieldIsRequired(field string) error {
+	return fmt.Errorf("url query param '%s' is required", field)
+}
+
+func MustBeNumeric(field string) error {
+	return fmt.Errorf("%s must be numeric", field)
+}

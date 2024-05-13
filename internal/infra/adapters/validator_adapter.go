@@ -52,8 +52,12 @@ func (v *validatorAdapter) ValidatePasswordConfirmationEquals(password, password
 	return v.defaultFieldCompareValidation(password, passwordConfirmation, "passwordConfirmation", fn)
 }
 
-func (v *validatorAdapter) ValidateFieldString(f interface{}, fieldName string) protocol_validation.Validator {
+func (v *validatorAdapter) ValidateStringField(f interface{}, fieldName string) protocol_validation.Validator {
 	return v.defaultValidation(f, fieldName, "omitempty,alphanumunicode", errors_validation.MustBeString)
+}
+
+func (v *validatorAdapter) ValidateNumberField(f interface{}, fieldName string) protocol_validation.Validator {
+	return v.defaultValidation(f, fieldName, "omitempty,numeric", errors_validation.MustBeString)
 }
 
 func (v *validatorAdapter) ValidateFieldLength(f interface{}, fieldName string, length int) protocol_validation.Validator {

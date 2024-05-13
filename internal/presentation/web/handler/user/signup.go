@@ -25,8 +25,6 @@ func NewSignupHandler(signUpValidation user_validation.SignupValidation,
 func (h *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var input user_usecase.SignupInputDto
 
-	w.Header().Set("Content-Type", "application/json")
-
 	responseManager := web_response_manager.NewResponseManager(w)
 
 	err := json.NewDecoder(r.Body).Decode(&input)

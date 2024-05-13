@@ -33,14 +33,14 @@ func (p *Protected) GetMiddleware() func(next http.Handler) http.Handler {
 				return
 			}
 
-			output, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
+			_, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
 
 			if err != nil {
 				responseManager.RespondUnauthorized()
 				return
 			}
 
-			responseManager.RawRespond(200, output)
+			next.ServeHTTP(w, r)
 		})
 	}
 }
