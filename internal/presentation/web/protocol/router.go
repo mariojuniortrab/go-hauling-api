@@ -8,6 +8,7 @@ type Router interface {
 	Use(middlewares ...func(http.Handler) http.Handler)
 	With(middlewares ...func(http.Handler) http.Handler) Router
 	Route(pattern string, fn func(r Router)) Router
+	Group(fn func(r Router)) Router
 
 	// HTTP-method routing along `pattern`
 	Connect(pattern string, h http.HandlerFunc)

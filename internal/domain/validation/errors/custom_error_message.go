@@ -60,3 +60,7 @@ func MustBeDateFormat(field string) error {
 func InternalServerError() error {
 	return errors.New("internal server error")
 }
+
+func Unauthorized() error {
+	return errors.New("unauthorized")
+}

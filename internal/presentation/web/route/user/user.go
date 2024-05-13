@@ -1,12 +1,16 @@
 package user_routes
 
 import (
+	"encoding/json"
+	"net/http"
+
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
 	user_handler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/handler/user"
+	web_middleware "github.com/mariojuniortrab/hauling-api/internal/presentation/web/middleware"
 	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 )
 
@@ -32,6 +36,19 @@ func NewRouter(userRepository user_entity.UserRepository,
 func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	signupHandler := r.getSignupHandler()
 	loginHandler := r.getLoginHandler()
+
+	route.Group(func(rr web_protocol.Router) {
+		authUseCase := user_usecase.NewAuthorization(r.tokenizer)
+		protected := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase)
+
+		rr.Use(protected.GetMiddleware())
+
+		rr.Get("/user", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			json.NewEncoder(w).Encode("Response")
+		})
+
+	})
 
 	route.Post("/signup", signupHandler.Handle)
 	route.Post("/login", loginHandler.Handle)

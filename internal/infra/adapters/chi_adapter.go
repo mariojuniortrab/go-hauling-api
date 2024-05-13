@@ -8,12 +8,12 @@ import (
 )
 
 type chiRouteAdapter struct {
-	chi *chi.Mux
+	chi chi.Router
 }
 
 func NewChiRouteAdapter() *chiRouteAdapter {
 	return &chiRouteAdapter{
-		chi: chi.NewMux(),
+		chi: chi.NewRouter(),
 	}
 }
 
@@ -33,6 +33,18 @@ func (a *chiRouteAdapter) Route(pattern string, fn func(r web_protocol.Router)) 
 	}
 
 	a.chi.Route(pattern, chiFn)
+	return a
+}
+
+func (a *chiRouteAdapter) Group(fn func(r web_protocol.Router)) web_protocol.Router {
+	chiFn := func(r chi.Router) {
+		newAdapter := &chiRouteAdapter{
+			chi: r,
+		}
+		fn(newAdapter)
+	}
+
+	a.chi.Group(chiFn)
 	return a
 }
 

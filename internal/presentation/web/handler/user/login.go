@@ -2,7 +2,6 @@ package user_handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
@@ -43,7 +42,7 @@ func (h *loginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := h.loginUseCase.GetByEmail(&input)
-	fmt.Println("user found:", user)
+
 	if err != nil {
 		responseManager.RespondInternalServerError(err)
 		return

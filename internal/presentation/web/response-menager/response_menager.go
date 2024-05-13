@@ -14,12 +14,16 @@ type ResponseManager interface {
 	SetBadRequestStatus() ResponseManager
 	SetConflictStatus() ResponseManager
 	SetInternalServerErrorStatus() ResponseManager
+	SetUnauthorizedStatus() ResponseManager
 	AddError(err *errors_validation.CustomErrorMessage) ResponseManager
 	AddErrors(errs []*errors_validation.CustomErrorMessage) ResponseManager
 	SetMessage(message string) ResponseManager
 	SetData(data interface{}) ResponseManager
 	Respond()
 	RespondInternalServerError(err error)
+	RespondLoginInvalid()
+	RespondUnauthorized()
+	RawRespond(statusCode int, data interface{})
 }
 
 type messageSucessful struct {
@@ -64,6 +68,10 @@ func (r *responseManager) SetConflictStatus() ResponseManager {
 
 func (r *responseManager) SetInternalServerErrorStatus() ResponseManager {
 	return r.setStatusCode(http.StatusInternalServerError)
+}
+
+func (r *responseManager) SetUnauthorizedStatus() ResponseManager {
+	return r.setStatusCode(http.StatusUnauthorized)
 }
 
 func (r *responseManager) setStatusCode(statusCode int) ResponseManager {
@@ -118,4 +126,15 @@ func (r *responseManager) RespondLoginInvalid() {
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UserNotFound(), "")
 	r.SetBadRequestStatus().AddError(errorMessage)
 	r.Respond()
+}
+
+func (r *responseManager) RespondUnauthorized() {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.Unauthorized(), "")
+	r.SetUnauthorizedStatus().AddError(errorMessage)
+	r.Respond()
+}
+
+func (r *responseManager) RawRespond(statusCode int, data interface{}) {
+	r.w.WriteHeader(r.statusCode)
+	json.NewEncoder(r.w).Encode(data)
 }
