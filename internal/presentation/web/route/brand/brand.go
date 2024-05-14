@@ -31,7 +31,6 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	route.Post("/brands", createBrandHandler.Handle)
 	route.Get("/brands", listBrandHandler.Handle)
 
-	fmt.Println("[brand_routes > router > Route]")
-
+	fmt.Println("[brand_routes > router > Route] routes up")
 	return route
 }

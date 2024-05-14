@@ -57,7 +57,7 @@ func (v *validatorAdapter) ValidateStringField(f interface{}, fieldName string) 
 }
 
 func (v *validatorAdapter) ValidateNumberField(f interface{}, fieldName string) protocol_validation.Validator {
-	return v.defaultValidation(f, fieldName, "omitempty,numeric", errors_validation.MustBeString)
+	return v.defaultValidation(f, fieldName, "omitempty,numeric", errors_validation.MustBeNumeric)
 }
 
 func (v *validatorAdapter) ValidateStringBooleanField(f interface{}, fieldName string) protocol_validation.Validator {
@@ -79,6 +79,7 @@ func (v *validatorAdapter) ValidateFieldMinLength(f interface{}, fieldName strin
 func (v *validatorAdapter) defaultLenghValidation(f interface{}, fieldName, flag string, errMessage error) protocol_validation.Validator {
 	err := v.validator.Var(f, flag)
 
+	fmt.Println("err:", err)
 	if err != nil {
 		v.errors = append(v.errors, errors_validation.NewCustomErrorMessage(errMessage, fieldName))
 	}

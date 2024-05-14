@@ -51,8 +51,7 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	route.Post("/signup", signupHandler.Handle)
 	route.Post("/login", loginHandler.Handle)
 
-	fmt.Println("[user_routes > router > Route] Routes up:")
-
+	fmt.Println("[user_routes > router > Route] routes up")
 	return route
 }
 
