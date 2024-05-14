@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
-	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-menager"
+	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type list struct {

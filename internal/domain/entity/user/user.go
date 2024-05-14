@@ -4,12 +4,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	default_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/default"
 )
 
-type UserRepository interface {
-	Create(*User) error
-	GetByEmail(string, string) (*User, error)
-	Login(string, string) (*User, error)
+type ListUserParams struct {
+	default_entity.List
+	ID                string
+	Name              string
+	WillFilterActives bool
+	Active            bool
+	Email             string
 }
 
 type User struct {

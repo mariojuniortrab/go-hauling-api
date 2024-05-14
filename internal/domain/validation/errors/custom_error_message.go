@@ -72,3 +72,7 @@ func URLQueryFieldIsRequired(field string) error {
 func MustBeNumeric(field string) error {
 	return fmt.Errorf("%s must be numeric", field)
 }
+
+func MustBeBoolean(field string) error {
+	return fmt.Errorf("%s must be true or false", field)
+}

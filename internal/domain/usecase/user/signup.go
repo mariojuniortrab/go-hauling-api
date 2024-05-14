@@ -23,11 +23,11 @@ type signupOutputDto struct {
 }
 
 type Signup struct {
-	userRepository user_entity.UserRepository
+	userRepository protocol_usecase.UserRepository
 	encrypter      protocol_usecase.Encrypter
 }
 
-func NewSignupUseCase(userRepository user_entity.UserRepository,
+func NewSignupUseCase(userRepository protocol_usecase.UserRepository,
 	encrypter protocol_usecase.Encrypter) *Signup {
 	return &Signup{
 		userRepository,
@@ -35,7 +35,7 @@ func NewSignupUseCase(userRepository user_entity.UserRepository,
 	}
 }
 
-func (s *Signup) Execute(input SignupInputDto) (*signupOutputDto, error) {
+func (s *Signup) Execute(input *SignupInputDto) (*signupOutputDto, error) {
 	formattedDate, err := getFormattedDate(input.Birth)
 	if err != nil {
 		return nil, err

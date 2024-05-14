@@ -60,6 +60,10 @@ func (v *validatorAdapter) ValidateNumberField(f interface{}, fieldName string) 
 	return v.defaultValidation(f, fieldName, "omitempty,numeric", errors_validation.MustBeString)
 }
 
+func (v *validatorAdapter) ValidateStringBooleanField(f interface{}, fieldName string) protocol_validation.Validator {
+	return v.defaultValidation(f, fieldName, "omitempty,oneof=true false", errors_validation.MustBeString)
+}
+
 func (v *validatorAdapter) ValidateFieldLength(f interface{}, fieldName string, length int) protocol_validation.Validator {
 	return v.defaultLenghValidation(f, fieldName, fmt.Sprintf("omitempty,len=%d", length), errors_validation.LengthMustBe(fieldName, length))
 }

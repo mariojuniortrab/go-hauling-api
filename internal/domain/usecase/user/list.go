@@ -1,23 +1,97 @@
 package user_usecase
 
-import protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+import (
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+)
 
 type filter struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Active string `json:"active"`
 }
 
-type ListInputDto struct {
+type ListUserInputDto struct {
 	protocol_usecase.List
 	filter
 }
 
-type list struct {
+type listItemOutputDto struct {
+	ID     string `json:"id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Birth  string `json:"birth"`
+	Active bool   `json:"active"`
 }
 
-func NewList() *list {
-	return &list{}
+type listOutputDto struct {
+	Items []*listItemOutputDto `json:"items"`
 }
 
-func (u *list) Execute() {
+type List struct {
+	userRepository protocol_usecase.UserRepository
+}
 
+func NewListUseCase(userRepository protocol_usecase.UserRepository) *List {
+	return &List{userRepository}
+}
+
+func newListUserParams(input *ListUserInputDto) *user_entity.ListUserParams {
+	willFilterActives := false
+	active := false
+
+	if input.Active != "" {
+		willFilterActives = true
+	}
+
+	if input.Active == "true" {
+		active = true
+	}
+
+	listUserParams := &user_entity.ListUserParams{
+		Active:            active,
+		WillFilterActives: willFilterActives,
+		ID:                input.ID,
+		Name:              input.Name,
+		Email:             input.Email,
+	}
+
+	listUserParams.Page = int(input.Page)
+	listUserParams.Limit = int(input.Limit)
+	listUserParams.OrderBy = input.OrderBy
+	listUserParams.OrderType = input.OrderType
+	listUserParams.Q = input.Q
+
+	return listUserParams
+}
+
+func NewListItemOutputDto(user *user_entity.User) *listItemOutputDto {
+	const shortForm = "2006-01-02"
+	birth := user.Birth.Format(shortForm)
+
+	return &listItemOutputDto{
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Birth:  birth,
+		Active: user.Active,
+	}
+}
+
+func (u *List) Execute(input *ListUserInputDto) (*listOutputDto, error) {
+	listUserParams := newListUserParams(input)
+
+	users, err := u.userRepository.List(listUserParams)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &listOutputDto{}
+
+	for _, user := range users {
+		result.Items = append(result.Items, NewListItemOutputDto(user))
+	}
+
+	return result, nil
 }

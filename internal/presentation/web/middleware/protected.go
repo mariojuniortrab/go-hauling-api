@@ -1,12 +1,17 @@
 package web_middleware
 
 import (
+	"context"
 	"net/http"
 
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
-	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-menager"
+	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
+
+type loggedUser struct {
+	user string
+}
 
 type Protected struct {
 	tokenizer protocol_usecase.Tokenizer
@@ -33,14 +38,18 @@ func (p *Protected) GetMiddleware() func(next http.Handler) http.Handler {
 				return
 			}
 
-			_, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
+			output, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
 
 			if err != nil {
 				responseManager.RespondUnauthorized()
 				return
 			}
 
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), loggedUser{"loggedUser"}, output)
+
+			newRequest := r.Clone(ctx)
+
+			next.ServeHTTP(w, newRequest)
 		})
 	}
 }

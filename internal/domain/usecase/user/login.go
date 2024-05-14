@@ -1,7 +1,6 @@
 package user_usecase
 
 import (
-	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 )
 
@@ -27,11 +26,11 @@ type LoginOutputDto struct {
 }
 
 type Login struct {
-	userRepository user_entity.UserRepository
+	userRepository protocol_usecase.UserRepository
 	tokenizer      protocol_usecase.Tokenizer
 }
 
-func NewLoginUseCase(userRepository user_entity.UserRepository,
+func NewLoginUseCase(userRepository protocol_usecase.UserRepository,
 	tokenizer protocol_usecase.Tokenizer) *Login {
 	return &Login{
 		userRepository,

@@ -6,7 +6,7 @@ import (
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
-	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-menager"
+	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type signupHandler struct {
@@ -50,7 +50,7 @@ func (h *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	output, err := h.signUp.Execute(input)
+	output, err := h.signUp.Execute(&input)
 	if err != nil {
 		responseManager.RespondInternalServerError(err)
 		return

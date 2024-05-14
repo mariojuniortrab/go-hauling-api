@@ -3,7 +3,7 @@ package user_validation
 import (
 	"time"
 
-	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -15,13 +15,13 @@ type SignupValidation interface {
 }
 type signUpValidation struct {
 	validator      protocol_validation.Validator
-	userRepository user_entity.UserRepository
+	userRepository protocol_usecase.UserRepository
 }
 
-func NewSignUpValidation(validator protocol_validation.Validator, userRepository user_entity.UserRepository) *signUpValidation {
+func NewSignUpValidation(validator protocol_validation.Validator, signupRepository protocol_usecase.UserRepository) *signUpValidation {
 	return &signUpValidation{
 		validator,
-		userRepository,
+		signupRepository,
 	}
 }
 

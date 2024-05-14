@@ -1,10 +1,6 @@
 package user_routes
 
 import (
-	"encoding/json"
-	"net/http"
-
-	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -15,13 +11,13 @@ import (
 )
 
 type router struct {
-	userRepository user_entity.UserRepository
+	userRepository protocol_usecase.UserRepository
 	validator      protocol_validation.Validator
 	encrypter      protocol_usecase.Encrypter
 	tokenizer      protocol_usecase.Tokenizer
 }
 
-func NewRouter(userRepository user_entity.UserRepository,
+func NewRouter(userRepository protocol_usecase.UserRepository,
 	validator protocol_validation.Validator,
 	encrypter protocol_usecase.Encrypter,
 	tokenizer protocol_usecase.Tokenizer) *router {
@@ -34,24 +30,22 @@ func NewRouter(userRepository user_entity.UserRepository,
 }
 
 func (r *router) Route(route web_protocol.Router) web_protocol.Router {
-	signupHandler := r.getSignupHandler()
-	loginHandler := r.getLoginHandler()
 	authUseCase := user_usecase.NewAuthorization(r.tokenizer)
 	protected := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase)
 	list := web_middleware.NewListMiddleware(r.validator)
 
 	route.Group(func(rr web_protocol.Router) {
-
 		rr.Use(protected.GetMiddleware())
 		rr.Use(list.GetMiddleware())
 
-		rr.Get("/user", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			json.NewEncoder(w).Encode("Response")
-		})
+		listHandler := r.getListHandler()
+
+		rr.Get("/user", listHandler.Handle)
 
 	})
 
+	signupHandler := r.getSignupHandler()
+	loginHandler := r.getLoginHandler()
 	route.Post("/signup", signupHandler.Handle)
 	route.Post("/login", loginHandler.Handle)
 
@@ -72,4 +66,12 @@ func (r *router) getLoginHandler() web_protocol.Handle {
 	signupHandler := user_handler.NewLoginHandle(loginValidation, loginUseCase)
 
 	return signupHandler
+}
+
+func (r *router) getListHandler() web_protocol.Handle {
+	listValidation := user_validation.NewListValidation(r.validator)
+	listUseCase := user_usecase.NewListUseCase(r.userRepository)
+	listHandler := user_handler.NewListHandler(listUseCase, listValidation)
+
+	return listHandler
 }
