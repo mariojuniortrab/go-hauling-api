@@ -2,6 +2,7 @@ package user_handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
@@ -28,22 +29,27 @@ func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	responseManager := web_response_manager.NewResponseManager(w)
 
 	err := json.NewDecoder(r.Body).Decode(&input)
+	fmt.Println("[user_handler > listHandler > Handle] input:", input)
 	if err != nil {
+		fmt.Println("[user_handler > listHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
 
 	validationErrs := h.listValidation.Validate(&input)
 	if validationErrs != nil {
+		fmt.Println("[user_handler > listHandler > Handle] validationErrs")
 		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
 		return
 	}
 
 	result, err := h.listUseCase.Execute(&input)
 	if err != nil {
+		fmt.Println("[user_handler > listHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
 
+	fmt.Println("[user_handler > listHandler > Handle] successful")
 	responseManager.SetStatusOk().SetMessage("login successful").SetData(result).Respond()
 }

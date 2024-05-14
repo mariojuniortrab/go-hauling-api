@@ -2,6 +2,7 @@ package infra_adapters
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,6 +18,9 @@ func NewJwtAdapter() *jwtAdapter {
 }
 
 func (j *jwtAdapter) GenerateToken(id string, email string) (string, error) {
+	fmt.Println("[infra_adapters > jwtAdapter > GenerateToken] id:", id)
+	fmt.Println("[infra_adapters > jwtAdapter > GenerateToken] email:", email)
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"id":    id,

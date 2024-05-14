@@ -1,6 +1,7 @@
 package web_middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -22,10 +23,15 @@ func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
 
 			page := r.URL.Query().Get("page")
 			limit := r.URL.Query().Get("limit")
+
+			fmt.Println("[web_middlewares > list > handlerFunc] page:", page)
+			fmt.Println("[web_middlewares > list > handlerFunc] limit:", limit)
+
 			p.validatePage(page)
 			p.validateLimit(limit)
 
 			if p.validator.HasErrors() {
+				fmt.Println("[web_middlewares > list > handlerFunc] hasErrors")
 				responseManager.
 					SetBadRequestStatus().
 					AddErrors(p.validator.GetErrorsAndClean()).

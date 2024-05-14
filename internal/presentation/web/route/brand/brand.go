@@ -1,6 +1,8 @@
 package brand_routes
 
 import (
+	"fmt"
+
 	brand_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/brand"
 	brand_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/brand"
 	brand_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/brand"
@@ -28,6 +30,8 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 
 	route.Post("/brands", createBrandHandler.Handle)
 	route.Get("/brands", listBrandHandler.Handle)
+
+	fmt.Println("[brand_routes > router > Route]")
 
 	return route
 }

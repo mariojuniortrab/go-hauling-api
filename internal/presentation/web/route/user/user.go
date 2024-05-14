@@ -1,6 +1,8 @@
 package user_routes
 
 import (
+	"fmt"
+
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -48,6 +50,8 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 	loginHandler := r.getLoginHandler()
 	route.Post("/signup", signupHandler.Handle)
 	route.Post("/login", loginHandler.Handle)
+
+	fmt.Println("[user_routes > router > Route] Routes up:")
 
 	return route
 }

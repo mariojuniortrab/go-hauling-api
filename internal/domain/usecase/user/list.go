@@ -1,6 +1,8 @@
 package user_usecase
 
 import (
+	"fmt"
+
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 )
@@ -80,10 +82,12 @@ func NewListItemOutputDto(user *user_entity.User) *listItemOutputDto {
 }
 
 func (u *List) Execute(input *ListUserInputDto) (*listOutputDto, error) {
+	fmt.Println("[user_usecase > List > Execute] input:", input)
 	listUserParams := newListUserParams(input)
 
 	users, err := u.userRepository.List(listUserParams)
 	if err != nil {
+		fmt.Println("[user_usecase > List > Execute] err:", err)
 		return nil, err
 	}
 
@@ -93,5 +97,6 @@ func (u *List) Execute(input *ListUserInputDto) (*listOutputDto, error) {
 		result.Items = append(result.Items, NewListItemOutputDto(user))
 	}
 
+	fmt.Println("[user_usecase > List > Execute] success")
 	return result, nil
 }

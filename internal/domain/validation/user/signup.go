@@ -1,6 +1,7 @@
 package user_validation
 
 import (
+	"fmt"
 	"time"
 
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
@@ -26,6 +27,8 @@ func NewSignUpValidation(validator protocol_validation.Validator, signupReposito
 }
 
 func (v *signUpValidation) Validate(input *user_usecase.SignupInputDto) []*errors_validation.CustomErrorMessage {
+	fmt.Println("[user_validation > signUpValidation > Validate] input:", input)
+
 	v.validateEmail(input.Email)
 	v.validatePassword(input.Password)
 	v.validateName(input.Name)
@@ -36,6 +39,7 @@ func (v *signUpValidation) Validate(input *user_usecase.SignupInputDto) []*error
 		return v.validator.GetErrorsAndClean()
 	}
 
+	fmt.Println("[user_validation > signUpValidation > Validate] success")
 	return nil
 }
 

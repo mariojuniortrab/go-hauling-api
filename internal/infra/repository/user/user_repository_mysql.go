@@ -17,12 +17,14 @@ func NewRepositoryMysql(db *sql.DB) *userRepositoryMysql {
 }
 
 func (r *userRepositoryMysql) Create(user *user_entity.User) error {
+	fmt.Println("[user_repository > userRepositoryMysql > Create] user:", user)
 	query := "INSERT INTO users (id, name, email, password, active, birth) VALUES (?,?,?,?,?,?)"
 
 	_, err := r.DB.Exec(query,
 		user.ID, user.Name, user.Email, user.Password, user.Active, user.Birth)
 
 	if err != nil {
+		fmt.Println("[user_repository > userRepositoryMysql > Create] err:", err)
 		return err
 	}
 
@@ -30,6 +32,7 @@ func (r *userRepositoryMysql) Create(user *user_entity.User) error {
 }
 
 func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_entity.User, error) {
+	fmt.Println("[user_repository > userRepositoryMysql > List] input:", input)
 	var result []*user_entity.User
 
 	limit := input.Limit
@@ -42,9 +45,11 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 	query += fmt.Sprintf("LIMIT %d", limit)
 	query += fmt.Sprintf("OFFSET %d", offset)
 
-	rows, err := r.DB.Query(query)
+	fmt.Println("[user_repository > userRepositoryMysql > List] query:", query)
 
+	rows, err := r.DB.Query(query)
 	if err != nil {
+		fmt.Println("[user_repository > userRepositoryMysql > List] err:", err)
 		return nil, err
 	}
 
@@ -55,6 +60,7 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 
 		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Birth, &user.Active)
 		if err != nil {
+			fmt.Println("[user_repository > userRepositoryMysql > List] err:", err)
 			return nil, err
 		}
 
@@ -65,12 +71,14 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 }
 
 func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
+	fmt.Println("[user_repository > userRepositoryMysql > GetById] id:", id)
 	var user user_entity.User
 
 	err := r.DB.QueryRow("SELECT id, name, email, active FROM brands WHERE id = ?", id).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Active)
 
 	if err != nil && err != sql.ErrNoRows {
+		fmt.Println("[user_repository > userRepositoryMysql > GetById] err:", err)
 		return nil, err
 	}
 
@@ -79,21 +87,26 @@ func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 }
 
 func (r *userRepositoryMysql) GetByEmail(email string, id string) (*user_entity.User, error) {
+	fmt.Println("[user_repository > userRepositoryMysql > GetById] email:", email)
+	fmt.Println("[user_repository > userRepositoryMysql > GetById] id:", id)
+
 	var user user_entity.User
-	var query string
 	var row *sql.Row
 
+	query := "SELECT id, email, name, password, active FROM users"
+
 	if id != "" {
-		query = "SELECT id, email, name, password FROM users WHERE email = ? AND id <> ?"
+		query += " WHERE email = ? AND id <> ?"
 		row = r.DB.QueryRow(query, email, id)
 	} else {
-		query = "SELECT id, email, name, password FROM users WHERE email = ?"
+		query += " WHERE email = ?"
 		row = r.DB.QueryRow(query, email)
 	}
 
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	err := row.Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.Active)
 
 	if err != nil {
+		fmt.Println("[user_repository > userRepositoryMysql > GetById] err:", err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}

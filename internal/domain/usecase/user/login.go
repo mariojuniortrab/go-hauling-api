@@ -1,6 +1,8 @@
 package user_usecase
 
 import (
+	"fmt"
+
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 )
 
@@ -39,12 +41,15 @@ func NewLoginUseCase(userRepository protocol_usecase.UserRepository,
 }
 
 func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
-	token, err := u.tokenizer.GenerateToken(input.ID, input.Email)
+	fmt.Println("[user_usecase > Login > Execute] input:", input)
 
+	token, err := u.tokenizer.GenerateToken(input.ID, input.Email)
 	if err != nil {
+		fmt.Println("[user_usecase > Login > Execute] err:", err)
 		return nil, err
 	}
 
+	fmt.Println("[user_usecase > Login > Execute] success")
 	return &LoginOutputDto{
 		Token:  token,
 		ID:     input.ID,
@@ -55,9 +60,11 @@ func (u *Login) Execute(input *UserDto) (*LoginOutputDto, error) {
 }
 
 func (u *Login) GetByEmail(input *LoginInputDto) (*UserDto, error) {
-	user, err := u.userRepository.GetByEmail(input.Email, "")
+	fmt.Println("[user_usecase > Login > GetByEmail] input:", input)
 
+	user, err := u.userRepository.GetByEmail(input.Email, "")
 	if err != nil {
+		fmt.Println("[user_usecase > Login > GetByEmail] err:", err)
 		return nil, err
 	}
 

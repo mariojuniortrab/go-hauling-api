@@ -1,6 +1,7 @@
 package user_usecase
 
 import (
+	"fmt"
 	"time"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
@@ -36,13 +37,17 @@ func NewSignupUseCase(userRepository protocol_usecase.UserRepository,
 }
 
 func (s *Signup) Execute(input *SignupInputDto) (*signupOutputDto, error) {
+	fmt.Println("[user_usecase > Signup > Execute] input:", input)
+
 	formattedDate, err := getFormattedDate(input.Birth)
 	if err != nil {
+		fmt.Println("[user_usecase > Signup > Execute] err:", err)
 		return nil, err
 	}
 
 	hashPassword, err := s.encrypter.Hash(input.Password)
 	if err != nil {
+		fmt.Println("[user_usecase > Signup > Execute] err:", err)
 		return nil, err
 	}
 
@@ -50,8 +55,10 @@ func (s *Signup) Execute(input *SignupInputDto) (*signupOutputDto, error) {
 
 	err = s.userRepository.Create(user)
 	if err != nil {
+		fmt.Println("[user_usecase > Signup > Execute] err:", err)
 		return nil, err
 	}
+	fmt.Println("[user_usecase > Signup > Execute] success")
 
 	return &signupOutputDto{
 		Email: user.Email,

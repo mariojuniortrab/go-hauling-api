@@ -1,6 +1,8 @@
 package user_validation
 
 import (
+	"fmt"
+
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -19,6 +21,8 @@ func NewListValidation(validator protocol_validation.Validator) *listValidation 
 }
 
 func (v *listValidation) Validate(input *user_usecase.ListUserInputDto) []*errors_validation.CustomErrorMessage {
+	fmt.Println("[user_validation > listValidation > Validate] input:", input)
+
 	v.validateEmail(input.Email)
 	v.validateName(input.Name)
 	v.validateActive(input.Active)
@@ -27,6 +31,7 @@ func (v *listValidation) Validate(input *user_usecase.ListUserInputDto) []*error
 		return v.validator.GetErrorsAndClean()
 	}
 
+	fmt.Println("[user_validation > listValidation > Validate] success")
 	return nil
 }
 

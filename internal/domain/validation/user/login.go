@@ -1,6 +1,8 @@
 package user_validation
 
 import (
+	"fmt"
+
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
@@ -23,6 +25,8 @@ func NewLoginValidation(validator protocol_validation.Validator,
 }
 
 func (v *loginValidation) Validate(input *user_usecase.LoginInputDto) []*errors_validation.CustomErrorMessage {
+	fmt.Println("[user_validation > loginValidation > Validate] input:", input)
+
 	v.validateEmail(input.Email)
 	v.validatePassword(input.Password)
 
@@ -30,11 +34,13 @@ func (v *loginValidation) Validate(input *user_usecase.LoginInputDto) []*errors_
 		return v.validator.GetErrorsAndClean()
 	}
 
+	fmt.Println("[user_validation > loginValidation > Validate] success")
 	return nil
 }
 
 func (v *loginValidation) IsCredentialInvalid(input *user_usecase.UserDto, password string) bool {
-	return !v.encrypter.CheckPasswordHash(input.Password, password)
+	inactive := !input.Active
+	return !v.encrypter.CheckPasswordHash(input.Password, password) || inactive
 }
 
 func (v *loginValidation) validateEmail(input string) {
