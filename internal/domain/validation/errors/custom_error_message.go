@@ -76,3 +76,11 @@ func MustBeNumeric(field string) error {
 func MustBeBoolean(field string) error {
 	return fmt.Errorf("%s must be true or false", field)
 }
+
+func UiidFromPathInvalid() error {
+	return errors.New("invalid path uuid paramater")
+}
+
+func UiidFromPathIsRequired() error {
+	return errors.New("uuid path parameter is required")
+}

@@ -23,6 +23,7 @@ func main() {
 	validator := infra_adapters.NewValidator()
 	encrypter := infra_adapters.NewBcryptAdapter()
 	tokenizer := infra_adapters.NewJwtAdapter()
+	urlParser := infra_adapters.NewChiUrlParserAdapter()
 
 	//Repositories
 	brandRepository := brand_repository.NewRepositoryMysql(db)
@@ -30,7 +31,7 @@ func main() {
 
 	//Routes
 	brandRouter := brand_routes.NewRouter(brandRepository)
-	userRouter := user_routes.NewRouter(userRepository, validator, encrypter, tokenizer)
+	userRouter := user_routes.NewRouter(userRepository, validator, encrypter, tokenizer, urlParser)
 
 	//Using chi with an adapter to manage routes
 	r := infra_adapters.NewChiRouteAdapter()

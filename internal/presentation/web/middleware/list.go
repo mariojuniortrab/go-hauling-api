@@ -8,15 +8,18 @@ import (
 	"strings"
 
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
+	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type list struct {
 	validator protocol_validation.Validator
+	urlParser web_protocol.URLParser
 }
 
-func NewListMiddleware(validator protocol_validation.Validator) *list {
-	return &list{validator}
+func NewListMiddleware(validator protocol_validation.Validator,
+	urlParser web_protocol.URLParser) *list {
+	return &list{validator, urlParser}
 }
 
 func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
@@ -24,10 +27,10 @@ func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			responseManager := web_response_manager.NewResponseManager(w)
 
-			page := r.URL.Query().Get("page")
-			limit := r.URL.Query().Get("limit")
-			orderBy := r.URL.Query().Get("orderBy")
-			orderType := r.URL.Query().Get("orderType")
+			page := p.urlParser.GetQueryParamFromURL(r, "page")
+			limit := p.urlParser.GetQueryParamFromURL(r, "limit")
+			orderBy := p.urlParser.GetQueryParamFromURL(r, "orderBy")
+			orderType := p.urlParser.GetQueryParamFromURL(r, "orderType")
 
 			fmt.Println("[web_middlewares > list > handlerFunc] page:", page)
 			fmt.Println("[web_middlewares > list > handlerFunc] limit:", limit)

@@ -6,19 +6,23 @@ import (
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
+	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type listHandler struct {
 	listUseCase    *user_usecase.List
 	listValidation user_validation.ListValidation
+	urlParser      web_protocol.URLParser
 }
 
 func NewListHandler(listUseCase *user_usecase.List,
-	listValidation user_validation.ListValidation) *listHandler {
+	listValidation user_validation.ListValidation,
+	urlParser web_protocol.URLParser) *listHandler {
 	return &listHandler{
 		listUseCase,
 		listValidation,
+		urlParser,
 	}
 }
 
@@ -49,14 +53,14 @@ func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *listHandler) parseUrlParams(r *http.Request, input *user_usecase.ListUserInputDto) {
-	input.Page = r.URL.Query().Get("page")
-	input.Limit = r.URL.Query().Get("limit")
-	input.OrderBy = r.URL.Query().Get("orderBy")
-	input.OrderType = r.URL.Query().Get("orderType")
-	input.Q = r.URL.Query().Get("q")
+	input.Page = h.urlParser.GetQueryParamFromURL(r, "page")
+	input.Limit = h.urlParser.GetQueryParamFromURL(r, "limit")
+	input.OrderBy = h.urlParser.GetQueryParamFromURL(r, "orderBy")
+	input.OrderType = h.urlParser.GetQueryParamFromURL(r, "orderType")
+	input.Q = h.urlParser.GetQueryParamFromURL(r, "q")
 
-	input.ID = r.URL.Query().Get("id")
-	input.Email = r.URL.Query().Get("email")
-	input.Name = r.URL.Query().Get("name")
-	input.Active = r.URL.Query().Get("active")
+	input.ID = h.urlParser.GetQueryParamFromURL(r, "id")
+	input.Email = h.urlParser.GetQueryParamFromURL(r, "email")
+	input.Name = h.urlParser.GetQueryParamFromURL(r, "name")
+	input.Active = h.urlParser.GetQueryParamFromURL(r, "active")
 }

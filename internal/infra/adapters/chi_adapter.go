@@ -88,3 +88,7 @@ func (a *chiRouteAdapter) Trace(pattern string, h http.HandlerFunc) {
 func (a *chiRouteAdapter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.chi.ServeHTTP(w, r)
 }
+
+func (a *chiRouteAdapter) GetPathParamFromURL(r *http.Request, key string) string {
+	return chi.URLParam(r, key)
+}

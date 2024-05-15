@@ -24,6 +24,8 @@ type ResponseManager interface {
 	RespondLoginInvalid()
 	RespondUnauthorized()
 	RawRespond(statusCode int, data interface{})
+	RespondUiidInvalid()
+	RespondUiidIsRequired()
 }
 
 type messageSucessful struct {
@@ -138,4 +140,16 @@ func (r *responseManager) RespondUnauthorized() {
 func (r *responseManager) RawRespond(statusCode int, data interface{}) {
 	r.w.WriteHeader(r.statusCode)
 	json.NewEncoder(r.w).Encode(data)
+}
+
+func (r *responseManager) RespondUiidInvalid() {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UiidFromPathInvalid(), "")
+	r.SetBadRequestStatus().AddError(errorMessage)
+	r.Respond()
+}
+
+func (r *responseManager) RespondUiidIsRequired() {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UiidFromPathIsRequired(), "")
+	r.SetBadRequestStatus().AddError(errorMessage)
+	r.Respond()
 }
