@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 )
+
+const tableName = "users"
 
 type userRepositoryMysql struct {
 	DB *sql.DB
@@ -18,7 +21,7 @@ func NewRepositoryMysql(db *sql.DB) *userRepositoryMysql {
 
 func (r *userRepositoryMysql) Create(user *user_entity.User) error {
 	fmt.Println("[user_repository > userRepositoryMysql > Create] user:", user)
-	query := "INSERT INTO users (id, name, email, password, active, birth) VALUES (?,?,?,?,?,?)"
+	query := fmt.Sprintf("INSERT INTO %s (id, name, email, password, active, birth) VALUES (?,?,?,?,?,?)", tableName)
 
 	_, err := r.DB.Exec(query,
 		user.ID, user.Name, user.Email, user.Password, user.Active, user.Birth)
@@ -38,12 +41,12 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 	limit := input.Limit
 	offset := (input.Page - 1) * limit
 
-	query := "SELECT ID, name, email, birth, active FROM user "
+	query := fmt.Sprintf("SELECT ID, name, email, birth, active FROM %s ", tableName)
 
 	query += r.getWhereForList(input)
 	query += r.getOrderByForList(input)
-	query += fmt.Sprintf("LIMIT %d", limit)
-	query += fmt.Sprintf("OFFSET %d", offset)
+	query += fmt.Sprintf(" LIMIT %d ", limit)
+	query += fmt.Sprintf(" OFFSET %d ", offset)
 
 	fmt.Println("[user_repository > userRepositoryMysql > List] query:", query)
 
@@ -57,12 +60,21 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 
 	for rows.Next() {
 		var user user_entity.User
+		var birth string
 
-		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Birth, &user.Active)
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &birth, &user.Active)
 		if err != nil {
 			fmt.Println("[user_repository > userRepositoryMysql > List] err:", err)
 			return nil, err
 		}
+
+		parsedDate, err := getFormattedDate(birth)
+		if err != nil {
+			fmt.Println("[user_repository > userRepositoryMysql > List] err:", err)
+			return nil, err
+		}
+
+		user.Birth = parsedDate
 
 		result = append(result, &user)
 	}
@@ -74,7 +86,9 @@ func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 	fmt.Println("[user_repository > userRepositoryMysql > GetById] id:", id)
 	var user user_entity.User
 
-	err := r.DB.QueryRow("SELECT id, name, email, active FROM brands WHERE id = ?", id).
+	query := fmt.Sprintf("SELECT id, name, email, active FROM %s WHERE id = ?", tableName)
+
+	err := r.DB.QueryRow(query, id).
 		Scan(&user.ID, &user.Name, &user.Email, &user.Active)
 
 	if err != nil && err != sql.ErrNoRows {
@@ -93,7 +107,7 @@ func (r *userRepositoryMysql) GetByEmail(email string, id string) (*user_entity.
 	var user user_entity.User
 	var row *sql.Row
 
-	query := "SELECT id, email, name, password, active FROM users"
+	query := fmt.Sprintf("SELECT id, email, name, password, active FROM %s", tableName)
 
 	if id != "" {
 		query += " WHERE email = ? AND id <> ?"
@@ -120,7 +134,8 @@ func (r *userRepositoryMysql) GetByEmail(email string, id string) (*user_entity.
 func (r *userRepositoryMysql) Login(email, password string) (*user_entity.User, error) {
 	var user user_entity.User
 
-	row := r.DB.QueryRow("SELECT id, email, name, password FROM users WHERE email = ? AND password = ?", email, password)
+	query := fmt.Sprintf("SELECT id, email, name, password FROM %s WHERE email = ? AND password = ?", tableName)
+	row := r.DB.QueryRow(query, email, password)
 	err := row.Scan(&user.ID, &user.Name)
 
 	if err != nil {
@@ -171,15 +186,23 @@ func (r *userRepositoryMysql) getWhereForList(input *user_entity.ListUserParams)
 
 func (r *userRepositoryMysql) getOrderByForList(input *user_entity.ListUserParams) string {
 	result := ""
-	orderType := "ASC"
+	orderType := " ASC "
 
 	if input.OrderType != "" {
-		orderType = input.OrderType
+		orderType = " " + input.OrderType + " "
 	}
 
 	if input.OrderBy != "" {
-		result = fmt.Sprintf(" ORDER BY %s %s", input.OrderBy, orderType)
+		result = fmt.Sprintf(" ORDER BY %s %s ", input.OrderBy, orderType)
 	}
 
 	return result
+}
+
+func getFormattedDate(date string) (time.Time, error) {
+	const shortForm = "2006-01-02"
+
+	result, err := time.Parse(shortForm, date)
+
+	return result, err
 }

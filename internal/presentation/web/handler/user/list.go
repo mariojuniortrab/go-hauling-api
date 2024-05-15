@@ -1,7 +1,6 @@
 package user_handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -28,13 +27,8 @@ func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	responseManager := web_response_manager.NewResponseManager(w)
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+	h.parseUrlParams(r, &input)
 	fmt.Println("[user_handler > listHandler > Handle] input:", input)
-	if err != nil {
-		fmt.Println("[user_handler > listHandler > Handle] err:", err)
-		responseManager.RespondInternalServerError(err)
-		return
-	}
 
 	validationErrs := h.listValidation.Validate(&input)
 	if validationErrs != nil {
@@ -51,5 +45,18 @@ func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("[user_handler > listHandler > Handle] successful")
-	responseManager.SetStatusOk().SetMessage("login successful").SetData(result).Respond()
+	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
+}
+
+func (h *listHandler) parseUrlParams(r *http.Request, input *user_usecase.ListUserInputDto) {
+	input.Page = r.URL.Query().Get("page")
+	input.Limit = r.URL.Query().Get("limit")
+	input.OrderBy = r.URL.Query().Get("orderBy")
+	input.OrderType = r.URL.Query().Get("orderType")
+	input.Q = r.URL.Query().Get("q")
+
+	input.ID = r.URL.Query().Get("id")
+	input.Email = r.URL.Query().Get("email")
+	input.Name = r.URL.Query().Get("name")
+	input.Active = r.URL.Query().Get("active")
 }

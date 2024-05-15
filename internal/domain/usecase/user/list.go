@@ -2,16 +2,18 @@ package user_usecase
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 )
 
 type filter struct {
-	ID     string `json:"id"`
-	Email  string `json:"email"`
-	Name   string `json:"name"`
-	Active string `json:"active"`
+	ID     string
+	Email  string
+	Name   string
+	Active string
 }
 
 type ListUserInputDto struct {
@@ -39,7 +41,7 @@ func NewListUseCase(userRepository protocol_usecase.UserRepository) *List {
 	return &List{userRepository}
 }
 
-func newListUserParams(input *ListUserInputDto) *user_entity.ListUserParams {
+func newListUserParams(input *ListUserInputDto) (*user_entity.ListUserParams, error) {
 	willFilterActives := false
 	active := false
 
@@ -59,13 +61,23 @@ func newListUserParams(input *ListUserInputDto) *user_entity.ListUserParams {
 		Email:             input.Email,
 	}
 
-	listUserParams.Page = int(input.Page)
-	listUserParams.Limit = int(input.Limit)
-	listUserParams.OrderBy = input.OrderBy
-	listUserParams.OrderType = input.OrderType
+	page, err := strconv.Atoi(input.Page)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := strconv.Atoi(input.Limit)
+	if err != nil {
+		return nil, err
+	}
+
+	listUserParams.Page = page
+	listUserParams.Limit = limit
+	listUserParams.OrderBy = strings.ToLower(input.OrderBy)
+	listUserParams.OrderType = strings.ToLower(input.OrderType)
 	listUserParams.Q = input.Q
 
-	return listUserParams
+	return listUserParams, nil
 }
 
 func NewListItemOutputDto(user *user_entity.User) *listItemOutputDto {
@@ -83,7 +95,12 @@ func NewListItemOutputDto(user *user_entity.User) *listItemOutputDto {
 
 func (u *List) Execute(input *ListUserInputDto) (*listOutputDto, error) {
 	fmt.Println("[user_usecase > List > Execute] input:", input)
-	listUserParams := newListUserParams(input)
+
+	listUserParams, err := newListUserParams(input)
+	if err != nil {
+		fmt.Println("[user_usecase > List > Execute] err:", err)
+		return nil, err
+	}
 
 	users, err := u.userRepository.List(listUserParams)
 	if err != nil {

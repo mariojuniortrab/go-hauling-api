@@ -42,6 +42,7 @@ func (p *Protected) GetMiddleware() func(next http.Handler) http.Handler {
 			}
 
 			output, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
+			fmt.Println("[web_middlewares > Protected > handlerFunc] output:", output)
 			if err != nil {
 				fmt.Println("[web_middlewares > Protected > handlerFunc] err:", err)
 				responseManager.RespondUnauthorized()
