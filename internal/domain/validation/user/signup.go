@@ -2,10 +2,10 @@ package user_validation
 
 import (
 	"fmt"
-	"time"
 
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
+	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
@@ -86,11 +86,10 @@ func (v *signUpValidation) validateName(input string) {
 
 func (v *signUpValidation) validateBirth(input string) {
 	const fieldName = "birth"
-	const shortForm = "2006-01-02"
 
 	v.validator.ValidateRequiredField(input, fieldName)
 
-	_, err := time.Parse(shortForm, input)
+	_, err := util_usecase.GetDateFromString(input)
 	if err != nil {
 		v.validator.AddError(errors_validation.MustBeDateFormat(fieldName), fieldName)
 	}

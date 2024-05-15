@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-	"time"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 )
 
 const tableName = "users"
@@ -68,7 +68,7 @@ func (r *userRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_e
 			return nil, err
 		}
 
-		parsedDate, err := getFormattedDate(birth)
+		parsedDate, err := util_usecase.GetDateFromString(birth)
 		if err != nil {
 			fmt.Println("[user_repository > userRepositoryMysql > List] err:", err)
 			return nil, err
@@ -197,12 +197,4 @@ func (r *userRepositoryMysql) getOrderByForList(input *user_entity.ListUserParam
 	}
 
 	return result
-}
-
-func getFormattedDate(date string) (time.Time, error) {
-	const shortForm = "2006-01-02"
-
-	result, err := time.Parse(shortForm, date)
-
-	return result, err
 }

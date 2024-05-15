@@ -2,10 +2,10 @@ package user_usecase
 
 import (
 	"fmt"
-	"time"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 )
 
 type SignupInputDto struct {
@@ -39,7 +39,7 @@ func NewSignupUseCase(userRepository protocol_usecase.UserRepository,
 func (s *Signup) Execute(input *SignupInputDto) (*signupOutputDto, error) {
 	fmt.Println("[user_usecase > Signup > Execute] input:", input)
 
-	formattedDate, err := getFormattedDate(input.Birth)
+	formattedDate, err := util_usecase.GetDateFromString(input.Birth)
 	if err != nil {
 		fmt.Println("[user_usecase > Signup > Execute] err:", err)
 		return nil, err
@@ -64,19 +64,6 @@ func (s *Signup) Execute(input *SignupInputDto) (*signupOutputDto, error) {
 		Email: user.Email,
 		Name:  user.Name,
 		ID:    user.ID,
-		Birth: getStringDate(user.Birth),
+		Birth: util_usecase.GetStringFromDate(user.Birth),
 	}, nil
-}
-
-func getFormattedDate(date string) (time.Time, error) {
-	const shortForm = "2006-01-02"
-
-	result, err := time.Parse(shortForm, date)
-
-	return result, err
-}
-
-func getStringDate(date time.Time) string {
-	const shortForm = "2006-01-02"
-	return date.Format(shortForm)
 }

@@ -7,6 +7,7 @@ import (
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 )
 
 type filter struct {
@@ -81,8 +82,7 @@ func newListUserParams(input *ListUserInputDto) (*user_entity.ListUserParams, er
 }
 
 func NewListItemOutputDto(user *user_entity.User) *listItemOutputDto {
-	const shortForm = "2006-01-02"
-	birth := user.Birth.Format(shortForm)
+	birth := util_usecase.GetStringFromDate(user.Birth)
 
 	return &listItemOutputDto{
 		ID:     user.ID,
