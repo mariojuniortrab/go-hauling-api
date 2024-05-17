@@ -88,3 +88,6 @@ func UiidFromPathIsRequired() error {
 func NotFound(resource string) error {
 	return fmt.Errorf("%s not found", resource)
 }
+func EmptyRequest() error {
+	return errors.New("request body must be at least one editable field")
+}

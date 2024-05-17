@@ -217,3 +217,26 @@ func (r *userRepositoryMysql) Remove(id string) error {
 
 	return nil
 }
+
+func (r *userRepositoryMysql) Update(id string, editedUser *user_entity.User) error {
+	fmt.Println("[user_repository > userRepositoryMysql > Update] id:", id)
+
+	query := fmt.Sprintf("UPDATE %s SET ##fields## WHERE id = ?", tableName)
+
+	var fields []string
+
+	fields = append(fields, "name = ?")
+	fields = append(fields, "password = ?")
+	fields = append(fields, "birth = ?")
+	fields = append(fields, "active = ?")
+
+	query = strings.Replace(query, "##fields##", strings.Join(fields, ","), 1)
+
+	_, err := r.DB.Exec(query, id, editedUser.Name, editedUser.Password, editedUser.Birth, editedUser.Active)
+	if err != nil {
+		fmt.Println("[user_repository > userRepositoryMysql > Update] err:", err)
+		return err
+	}
+
+	return nil
+}

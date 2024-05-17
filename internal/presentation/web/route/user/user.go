@@ -54,6 +54,7 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 
 		rr.Get("/user/{id}", r.getDetailHandler().Handle)
 		rr.Delete("/user/{id}", r.getRemoveHandler().Handle)
+		rr.Patch("/user/{id}", r.getUpdateHandler().Handle)
 	})
 
 	route.Post("/signup", r.getSignupHandler().Handle)
@@ -99,4 +100,12 @@ func (r *router) getRemoveHandler() web_protocol.Handle {
 	removeHandler := user_handler.NewRemoveHandler(r.urlParser, removeUseCase)
 
 	return removeHandler
+}
+
+func (r *router) getUpdateHandler() web_protocol.Handle {
+	updateValidation := user_validation.NewUpdateValidation(r.validator)
+	updateUseCase := user_usecase.NewUpdateUserUsecase(r.userRepository)
+	userHandler := user_handler.NewUpdateHandler(r.urlParser, updateUseCase, updateValidation)
+
+	return userHandler
 }
