@@ -27,7 +27,7 @@ func (m *uuidParser) GetMiddleware() func(next http.Handler) http.Handler {
 				return
 			}
 
-			responseManager.RawRespond(200, "hello")
+			next.ServeHTTP(w, r)
 		})
 	}
 }

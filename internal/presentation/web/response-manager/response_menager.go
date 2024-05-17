@@ -15,6 +15,7 @@ type ResponseManager interface {
 	SetConflictStatus() ResponseManager
 	SetInternalServerErrorStatus() ResponseManager
 	SetUnauthorizedStatus() ResponseManager
+	SetNotFoundStatus() ResponseManager
 	AddError(err *errors_validation.CustomErrorMessage) ResponseManager
 	AddErrors(errs []*errors_validation.CustomErrorMessage) ResponseManager
 	SetMessage(message string) ResponseManager
@@ -26,6 +27,7 @@ type ResponseManager interface {
 	RawRespond(statusCode int, data interface{})
 	RespondUiidInvalid()
 	RespondUiidIsRequired()
+	RespondNotFound(resource string)
 }
 
 type messageSucessful struct {
@@ -75,6 +77,10 @@ func (r *responseManager) SetInternalServerErrorStatus() ResponseManager {
 
 func (r *responseManager) SetUnauthorizedStatus() ResponseManager {
 	return r.setStatusCode(http.StatusUnauthorized)
+}
+
+func (r *responseManager) SetNotFoundStatus() ResponseManager {
+	return r.setStatusCode(http.StatusNotFound)
 }
 
 func (r *responseManager) setStatusCode(statusCode int) ResponseManager {
@@ -151,5 +157,11 @@ func (r *responseManager) RespondUiidInvalid() {
 func (r *responseManager) RespondUiidIsRequired() {
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UiidFromPathIsRequired(), "")
 	r.SetBadRequestStatus().AddError(errorMessage)
+	r.Respond()
+}
+
+func (r *responseManager) RespondNotFound(resource string) {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.NotFound(resource), "")
+	r.SetNotFoundStatus().AddError(errorMessage)
 	r.Respond()
 }

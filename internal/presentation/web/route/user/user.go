@@ -53,6 +53,7 @@ func (r *router) Route(route web_protocol.Router) web_protocol.Router {
 		rr.Use(uuidUrlParser.GetMiddleware())
 
 		rr.Get("/user/{id}", r.getDetailHandler().Handle)
+		rr.Delete("/user/{id}", r.getRemoveHandler().Handle)
 	})
 
 	route.Post("/signup", r.getSignupHandler().Handle)
@@ -91,4 +92,11 @@ func (r *router) getDetailHandler() web_protocol.Handle {
 	detailHandler := user_handler.NewDetailHandler(r.urlParser, detailUseCase)
 
 	return detailHandler
+}
+
+func (r *router) getRemoveHandler() web_protocol.Handle {
+	removeUseCase := user_usecase.NewRemoveUserUsecase(r.userRepository)
+	removeHandler := user_handler.NewRemoveHandler(r.urlParser, removeUseCase)
+
+	return removeHandler
 }

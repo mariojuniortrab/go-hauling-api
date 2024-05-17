@@ -1,6 +1,7 @@
 package user_usecase
 
 import (
+	"errors"
 	"fmt"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
@@ -8,11 +9,11 @@ import (
 	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 )
 
-type UserDetailInputDto struct {
+type UserRemoveInputDto struct {
 	ID string
 }
 
-type userDetailOutputDto struct {
+type userRemoveOutputDto struct {
 	ID     string `json:"id"`
 	Email  string `json:"email"`
 	Name   string `json:"name"`
@@ -20,10 +21,10 @@ type userDetailOutputDto struct {
 	Active bool   `json:"active"`
 }
 
-func NewUserDetailOutputDto(user *user_entity.User) *userDetailOutputDto {
+func NewUserRemoveOutputDto(user *user_entity.User) *userRemoveOutputDto {
 	birth := util_usecase.GetStringFromDate(user.Birth)
 
-	return &userDetailOutputDto{
+	return &userRemoveOutputDto{
 		ID:     user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
@@ -32,27 +33,32 @@ func NewUserDetailOutputDto(user *user_entity.User) *userDetailOutputDto {
 	}
 }
 
-type DetailUserUseCase struct {
+type RemoveUserUseCase struct {
 	userRepository protocol_usecase.UserRepository
 }
 
-func NewDetailuserUsecase(userRepository protocol_usecase.UserRepository) *DetailUserUseCase {
-	return &DetailUserUseCase{userRepository}
+func NewRemoveUserUsecase(userRepository protocol_usecase.UserRepository) *RemoveUserUseCase {
+	return &RemoveUserUseCase{userRepository}
 }
 
-func (u *DetailUserUseCase) Execute(input *UserDetailInputDto) (*userDetailOutputDto, error) {
+func (u *RemoveUserUseCase) Execute(input *UserRemoveInputDto) (error, error) {
 	user, err := u.userRepository.GetById(input.ID)
-	fmt.Println("[user_usecase > detail > Execute] user:", user)
+	fmt.Println("[user_usecase > Remove > Execute] user:", user)
 
 	if err != nil {
-		fmt.Println("[user_usecase > detail > Execute] err:", err)
-		return nil, err
+		fmt.Println("[user_usecase > Remove > Execute] err:", err)
+		return err, nil
 	}
 
 	if user == nil {
-		return nil, nil
+		return nil, errors.New("not found")
 	}
 
-	output := NewUserDetailOutputDto(user)
-	return output, nil
+	err = u.userRepository.Remove(input.ID)
+	if err != nil {
+		fmt.Println("[user_usecase > Remove > Execute] err:", err)
+		return nil, err
+	}
+
+	return nil, nil
 }

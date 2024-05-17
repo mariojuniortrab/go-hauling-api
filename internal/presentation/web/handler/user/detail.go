@@ -24,9 +24,10 @@ func (h *detailHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	responseManager := web_response_manager.NewResponseManager(w)
 
-	uuid := h.urlParser.GetPathParamFromURL(r, "id")
-	fmt.Println("[user_handler > detailHandler > Handle] uuid:", uuid)
-	if uuid == "" {
+	input.ID = h.urlParser.GetPathParamFromURL(r, "id")
+
+	fmt.Println("[user_handler > detailHandler > Handle] uuid:", input.ID)
+	if input.ID == "" {
 		responseManager.RespondUiidIsRequired()
 	}
 
@@ -34,6 +35,11 @@ func (h *detailHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("[user_handler > detailHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
+		return
+	}
+
+	if result == nil {
+		responseManager.RespondNotFound("user")
 		return
 	}
 

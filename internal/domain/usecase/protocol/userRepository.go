@@ -10,4 +10,5 @@ type UserRepository interface {
 	Login(email string, password string) (*user_entity.User, error)
 	List(input *user_entity.ListUserParams) ([]*user_entity.User, error)
 	GetById(id string) (*user_entity.User, error)
+	Remove(id string) error
 }

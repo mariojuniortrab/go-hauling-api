@@ -84,3 +84,7 @@ func UiidFromPathInvalid() error {
 func UiidFromPathIsRequired() error {
 	return errors.New("uuid path parameter is required")
 }
+
+func NotFound(resource string) error {
+	return fmt.Errorf("%s not found", resource)
+}

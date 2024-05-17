@@ -96,6 +96,11 @@ func (r *userRepositoryMysql) GetById(id string) (*user_entity.User, error) {
 		return nil, err
 	}
 
+	if err != nil && err == sql.ErrNoRows {
+		fmt.Println("[user_repository > userRepositoryMysql > GetById] err:", err)
+		return nil, nil
+	}
+
 	return &user, nil
 
 }
@@ -197,4 +202,18 @@ func (r *userRepositoryMysql) getOrderByForList(input *user_entity.ListUserParam
 	}
 
 	return result
+}
+
+func (r *userRepositoryMysql) Remove(id string) error {
+	fmt.Println("[user_repository > userRepositoryMysql > Remove] id:", id)
+
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", tableName)
+
+	_, err := r.DB.Exec(query, id)
+	if err != nil {
+		fmt.Println("[user_repository > userRepositoryMysql > GetById] err:", err)
+		return err
+	}
+
+	return nil
 }
