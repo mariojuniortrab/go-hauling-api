@@ -1,17 +1,15 @@
 package user_validation
 
 import (
-	"fmt"
-
+	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
+	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
-	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type SignupValidation interface {
-	Validate(input *user_usecase.SignupInputDto) []*errors_validation.CustomErrorMessage
+	Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomErrorMessage
 	AlreadyExists(email, id string) (*errors_validation.CustomErrorMessage, error)
 }
 type signUpValidation struct {
@@ -26,9 +24,7 @@ func NewSignUpValidation(validator protocol_validation.Validator, signupReposito
 	}
 }
 
-func (v *signUpValidation) Validate(input *user_usecase.SignupInputDto) []*errors_validation.CustomErrorMessage {
-	fmt.Println("[user_validation > signUpValidation > Validate] input:", input)
-
+func (v *signUpValidation) Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomErrorMessage {
 	v.validateEmail(input.Email)
 	v.validatePassword(input.Password)
 	v.validateName(input.Name)
@@ -39,7 +35,6 @@ func (v *signUpValidation) Validate(input *user_usecase.SignupInputDto) []*error
 		return v.validator.GetErrorsAndClean()
 	}
 
-	fmt.Println("[user_validation > signUpValidation > Validate] success")
 	return nil
 }
 
@@ -89,7 +84,7 @@ func (v *signUpValidation) validateBirth(input string) {
 
 	v.validator.ValidateRequiredField(input, fieldName)
 
-	_, err := util_usecase.GetDateFromString(input)
+	_, err := util_entity.GetDateFromString(input)
 	if err != nil {
 		v.validator.AddError(errors_validation.MustBeDateFormat(fieldName), fieldName)
 	}

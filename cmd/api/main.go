@@ -7,9 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	infra_adapters "github.com/mariojuniortrab/hauling-api/internal/infra/adapters"
-	brand_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/brand"
-	user_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/user"
-	brand_routes "github.com/mariojuniortrab/hauling-api/internal/presentation/web/route/brand"
+	user_mysql_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/mysql/user"
 	user_routes "github.com/mariojuniortrab/hauling-api/internal/presentation/web/route/user"
 )
 
@@ -26,18 +24,15 @@ func main() {
 	urlParser := infra_adapters.NewChiUrlParserAdapter()
 
 	//Repositories
-	brandRepository := brand_repository.NewRepositoryMysql(db)
-	userRepository := user_repository.NewRepositoryMysql(db)
+	userRepository := user_mysql_repository.NewRepositoryMysql(db)
 
 	//Routes
-	brandRouter := brand_routes.NewRouter(brandRepository)
 	userRouter := user_routes.NewRouter(userRepository, validator, encrypter, tokenizer, urlParser)
 
 	//Using chi with an adapter to manage routes
 	r := infra_adapters.NewChiRouteAdapter()
 
 	//routing
-	brandRouter.Route(r)
 	userRouter.Route(r)
 
 	//starting server

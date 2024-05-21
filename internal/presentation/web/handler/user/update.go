@@ -24,42 +24,38 @@ func NewUpdateHandler(urlParser web_protocol.URLParser,
 }
 
 func (h *updateHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var input user_usecase.UserUpdateInputDto
-
 	responseManager := web_response_manager.NewResponseManager(w)
+	id := h.urlParser.GetPathParamFromURL(r, "id")
 
-	input.ID = h.urlParser.GetPathParamFromURL(r, "id")
-
-	fmt.Println("[user_handler > updateHandler > Handle] uuid:", input.ID)
-	if input.ID == "" {
-		responseManager.RespondUiidIsRequired()
+	editedUser, err := h.updateUseCase.GetForUpdate(id)
+	if err != nil {
+		responseManager.RespondInternalServerError(err)
+	}
+	if editedUser == nil {
+		responseManager.RespondNotFound("user")
+		return
 	}
 
-	var updateValues user_usecase.UpdateFields
-
-	err := json.NewDecoder(r.Body).Decode(&updateValues)
-	fmt.Println("[user_handler > signupHandler > Handle] input:", input)
+	fmt.Printf("r.Body: %+v\n", r.Body)
+	err = json.NewDecoder(r.Body).Decode(editedUser)
+	fmt.Println("Decodou:", editedUser)
 	if err != nil {
-		fmt.Println("[user_handler > signupHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
 
-	emptyRequestError, validationErrs := h.updateValidation.Validate(&updateValues)
+	emptyRequestError, validationErrs := h.updateValidation.Validate(editedUser)
 	if validationErrs != nil {
-		fmt.Println("[user_handler > signupHandler > Handle] validationErrs")
 		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
 		return
 	}
 	if emptyRequestError != nil {
-		fmt.Println("[user_handler > signupHandler > Handle] validationErrs")
 		responseManager.SetBadRequestStatus().AddError(emptyRequestError).Respond()
 		return
 	}
 
-	result, err := h.updateUseCase.Execute(&input, &updateValues)
+	result, err := h.updateUseCase.Execute(id, editedUser)
 	if err != nil {
-		fmt.Println("[user_handler > updateHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
@@ -69,6 +65,5 @@ func (h *updateHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("[user_handler > updateHandler > Handle] successful")
 	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
 }

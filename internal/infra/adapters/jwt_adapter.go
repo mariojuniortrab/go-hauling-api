@@ -2,11 +2,10 @@ package infra_adapters
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 )
 
 type jwtAdapter struct{}
@@ -18,9 +17,6 @@ func NewJwtAdapter() *jwtAdapter {
 }
 
 func (j *jwtAdapter) GenerateToken(id string, email string) (string, error) {
-	fmt.Println("[infra_adapters > jwtAdapter > GenerateToken] id:", id)
-	fmt.Println("[infra_adapters > jwtAdapter > GenerateToken] email:", email)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"id":    id,
@@ -30,7 +26,7 @@ func (j *jwtAdapter) GenerateToken(id string, email string) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func (j *jwtAdapter) ParseToken(token string) (*protocol_usecase.TokenOutputDto, error) {
+func (j *jwtAdapter) ParseToken(token string) (*auth_entity.TokenOutputDto, error) {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 
@@ -53,7 +49,7 @@ func (j *jwtAdapter) ParseToken(token string) (*protocol_usecase.TokenOutputDto,
 		return nil, errors.New("invalid token")
 	}
 
-	return &protocol_usecase.TokenOutputDto{
+	return &auth_entity.TokenOutputDto{
 			Email: claims["email"].(string),
 			ID:    claims["id"].(string),
 		},

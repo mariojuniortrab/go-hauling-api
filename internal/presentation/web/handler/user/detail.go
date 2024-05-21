@@ -1,7 +1,6 @@
 package user_handler
 
 import (
-	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
@@ -20,20 +19,16 @@ func NewDetailHandler(urlParser web_protocol.URLParser,
 }
 
 func (h *detailHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var input user_usecase.UserDetailInputDto
-
 	responseManager := web_response_manager.NewResponseManager(w)
 
-	input.ID = h.urlParser.GetPathParamFromURL(r, "id")
+	id := h.urlParser.GetPathParamFromURL(r, "id")
 
-	fmt.Println("[user_handler > detailHandler > Handle] uuid:", input.ID)
-	if input.ID == "" {
+	if id == "" {
 		responseManager.RespondUiidIsRequired()
 	}
 
-	result, err := h.detailUseCase.Execute(&input)
+	result, err := h.detailUseCase.Execute(id)
 	if err != nil {
-		fmt.Println("[user_handler > detailHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
@@ -43,6 +38,5 @@ func (h *detailHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("[user_handler > detailHandler > Handle] successful")
 	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
 }

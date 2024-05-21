@@ -1,9 +1,9 @@
-package user_usecase
+package auth_usecase
 
 import (
 	"errors"
-	"fmt"
 
+	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 )
 
@@ -21,19 +21,15 @@ func NewAuthorization(tokenizer protocol_usecase.Tokenizer) *Authorization {
 	}
 }
 
-func (a *Authorization) Execute(input *AuthInputDto) (*protocol_usecase.TokenOutputDto, error) {
-	fmt.Println("[user_usecase > Authorization > Execute] input:", input)
-
+func (a *Authorization) Execute(input *AuthInputDto) (*auth_entity.TokenOutputDto, error) {
 	if input.Token == "" {
 		return nil, errors.New("token is empty")
 	}
 
 	output, err := a.tokenizer.ParseToken(input.Token)
 	if err != nil {
-		fmt.Println("[user_usecase > Authorization > Execute] err:", err)
 		return nil, err
 	}
 
-	fmt.Println("[user_usecase > Authorization > Execute] success")
 	return output, nil
 }

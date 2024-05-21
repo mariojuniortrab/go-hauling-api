@@ -1,16 +1,14 @@
 package user_validation
 
 import (
-	"fmt"
-
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
-	util_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/util"
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type UpdateValidation interface {
-	Validate(input *user_usecase.UpdateFields) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage)
+	Validate(input *user_entity.UserUpdateInputDto) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage)
 }
 type updateValidation struct {
 	validator protocol_validation.Validator
@@ -22,12 +20,7 @@ func NewUpdateValidation(validator protocol_validation.Validator) *updateValidat
 	}
 }
 
-func (v *updateValidation) Validate(input *user_usecase.UpdateFields) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage) {
-	fmt.Println("[user_validation > updateValidation > Validate] input:", input)
-
-	if v.isEmptyRequest(input) {
-		return errors_validation.NewCustomErrorMessage(errors_validation.EmptyRequest(), ""), nil
-	}
+func (v *updateValidation) Validate(input *user_entity.UserUpdateInputDto) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage) {
 
 	v.validatePassword(input.Password)
 	v.validateName(input.Name)
@@ -38,7 +31,6 @@ func (v *updateValidation) Validate(input *user_usecase.UpdateFields) (*errors_v
 		return nil, v.validator.GetErrorsAndClean()
 	}
 
-	fmt.Println("[user_validation > updateValidation > Validate] success")
 	return nil, nil
 }
 
@@ -61,7 +53,7 @@ func (v *updateValidation) validateName(input string) {
 func (v *updateValidation) validateBirth(input string) {
 	const fieldName = "birth"
 
-	_, err := util_usecase.GetDateFromString(input)
+	_, err := util_entity.GetDateFromString(input)
 	if err != nil {
 		v.validator.AddError(errors_validation.MustBeDateFormat(fieldName), fieldName)
 	}
@@ -78,8 +70,4 @@ func (v *updateValidation) validatePasswordConfirmation(input, password string) 
 		ValidateStringField(input, fieldName).
 		ValidateFieldMaxLength(input, fieldName, 50).
 		ValidatePasswordConfirmationEquals(input, password)
-}
-
-func (v *updateValidation) isEmptyRequest(fields *user_usecase.UpdateFields) bool {
-	return (&user_usecase.UpdateFields{}) == fields
 }

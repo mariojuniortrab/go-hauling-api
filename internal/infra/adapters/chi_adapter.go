@@ -1,6 +1,7 @@
 package infra_adapters
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -22,14 +23,15 @@ func (a *chiRouteAdapter) Use(middlewares ...func(http.Handler) http.Handler) {
 }
 
 func (a *chiRouteAdapter) With(middlewares ...func(http.Handler) http.Handler) web_protocol.Router {
-	a.chi.With(middlewares...)
-
-	return a
+	return &chiRouteAdapter{chi: a.chi.With(middlewares...)}
 }
 
 func (a *chiRouteAdapter) Route(pattern string, fn func(r web_protocol.Router)) web_protocol.Router {
 	chiFn := func(r chi.Router) {
-		fn(a)
+		newAdapter := &chiRouteAdapter{
+			chi: r,
+		}
+		fn(newAdapter)
 	}
 
 	a.chi.Route(pattern, chiFn)
@@ -70,7 +72,7 @@ func (a *chiRouteAdapter) Options(pattern string, h http.HandlerFunc) {
 }
 
 func (a *chiRouteAdapter) Patch(pattern string, h http.HandlerFunc) {
-	a.chi.Options(pattern, h)
+	a.chi.Patch(pattern, h)
 }
 
 func (a *chiRouteAdapter) Post(pattern string, h http.HandlerFunc) {
@@ -91,4 +93,17 @@ func (a *chiRouteAdapter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *chiRouteAdapter) GetPathParamFromURL(r *http.Request, key string) string {
 	return chi.URLParam(r, key)
+}
+
+func (a *chiRouteAdapter) PrintRoutes() {
+	a.printSubRoutes(a.chi.Routes(), "")
+}
+
+func (a *chiRouteAdapter) printSubRoutes(routes []chi.Route, parentRoute string) {
+	for _, route := range routes {
+		fmt.Println("route:", parentRoute, route.Pattern)
+		if route.SubRoutes != nil {
+			a.printSubRoutes(route.SubRoutes.Routes(), route.Pattern)
+		}
+	}
 }

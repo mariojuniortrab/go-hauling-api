@@ -11,5 +11,5 @@ type UserRepository interface {
 	List(input *user_entity.ListUserParams) ([]*user_entity.User, error)
 	GetById(id string) (*user_entity.User, error)
 	Remove(id string) error
-	Update(id string, editedUser *user_entity.User) error
+	Update(id string, editedUser *user_entity.User) (*user_entity.User, error)
 }

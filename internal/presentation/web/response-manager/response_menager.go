@@ -2,6 +2,7 @@ package web_response_manager
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -16,6 +17,8 @@ type ResponseManager interface {
 	SetInternalServerErrorStatus() ResponseManager
 	SetUnauthorizedStatus() ResponseManager
 	SetNotFoundStatus() ResponseManager
+	SetUnsupportedMediaTypeStatus() ResponseManager
+	SetRequestEntityTooLargeStatus() ResponseManager
 	AddError(err *errors_validation.CustomErrorMessage) ResponseManager
 	AddErrors(errs []*errors_validation.CustomErrorMessage) ResponseManager
 	SetMessage(message string) ResponseManager
@@ -27,7 +30,9 @@ type ResponseManager interface {
 	RawRespond(statusCode int, data interface{})
 	RespondUiidInvalid()
 	RespondUiidIsRequired()
+	RespondUnsupportedMediaType()
 	RespondNotFound(resource string)
+	AddNewGenericError(err string) ResponseManager
 }
 
 type messageSucessful struct {
@@ -67,6 +72,10 @@ func (r *responseManager) SetBadRequestStatus() ResponseManager {
 	return r.setStatusCode(http.StatusBadRequest)
 }
 
+func (r *responseManager) SetRequestEntityTooLargeStatus() ResponseManager {
+	return r.setStatusCode(http.StatusRequestEntityTooLarge)
+}
+
 func (r *responseManager) SetConflictStatus() ResponseManager {
 	return r.setStatusCode(http.StatusConflict)
 }
@@ -81,6 +90,10 @@ func (r *responseManager) SetUnauthorizedStatus() ResponseManager {
 
 func (r *responseManager) SetNotFoundStatus() ResponseManager {
 	return r.setStatusCode(http.StatusNotFound)
+}
+
+func (r *responseManager) SetUnsupportedMediaTypeStatus() ResponseManager {
+	return r.setStatusCode(http.StatusUnsupportedMediaType)
 }
 
 func (r *responseManager) setStatusCode(statusCode int) ResponseManager {
@@ -108,6 +121,12 @@ func (r *responseManager) SetData(data interface{}) ResponseManager {
 	return r
 }
 
+func (r *responseManager) AddNewGenericError(err string) ResponseManager {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors.New(err), "")
+	r.AddError(errorMessage)
+	return r
+}
+
 func (r *responseManager) Respond() {
 	r.w.WriteHeader(r.statusCode)
 
@@ -125,9 +144,9 @@ func (r *responseManager) Respond() {
 }
 
 func (r *responseManager) RespondInternalServerError(err error) {
+	log.Print(err)
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.InternalServerError(), "")
 	r.SetInternalServerErrorStatus().AddError(errorMessage)
-	log.Println(err)
 	r.Respond()
 }
 
@@ -157,6 +176,12 @@ func (r *responseManager) RespondUiidInvalid() {
 func (r *responseManager) RespondUiidIsRequired() {
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.UiidFromPathIsRequired(), "")
 	r.SetBadRequestStatus().AddError(errorMessage)
+	r.Respond()
+}
+
+func (r *responseManager) RespondUnsupportedMediaType() {
+	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.ContentTypeIsNotJSON(), "")
+	r.SetUnsupportedMediaTypeStatus().AddError(errorMessage)
 	r.Respond()
 }
 

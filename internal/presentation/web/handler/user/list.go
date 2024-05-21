@@ -1,9 +1,9 @@
 package user_handler
 
 import (
-	"fmt"
 	"net/http"
 
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
 	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
@@ -27,32 +27,28 @@ func NewListHandler(listUseCase *user_usecase.List,
 }
 
 func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var input user_usecase.ListUserInputDto
+	var input user_entity.ListUserInputDto
 
 	responseManager := web_response_manager.NewResponseManager(w)
 
 	h.parseUrlParams(r, &input)
-	fmt.Println("[user_handler > listHandler > Handle] input:", input)
 
 	validationErrs := h.listValidation.Validate(&input)
 	if validationErrs != nil {
-		fmt.Println("[user_handler > listHandler > Handle] validationErrs")
 		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
 		return
 	}
 
 	result, err := h.listUseCase.Execute(&input)
 	if err != nil {
-		fmt.Println("[user_handler > listHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
 
-	fmt.Println("[user_handler > listHandler > Handle] successful")
 	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
 }
 
-func (h *listHandler) parseUrlParams(r *http.Request, input *user_usecase.ListUserInputDto) {
+func (h *listHandler) parseUrlParams(r *http.Request, input *user_entity.ListUserInputDto) {
 	input.Page = h.urlParser.GetQueryParamFromURL(r, "page")
 	input.Limit = h.urlParser.GetQueryParamFromURL(r, "limit")
 	input.OrderBy = h.urlParser.GetQueryParamFromURL(r, "orderBy")

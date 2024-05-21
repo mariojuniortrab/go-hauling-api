@@ -2,11 +2,10 @@ package web_middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
+	auth_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/auth"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
@@ -16,11 +15,11 @@ type LoggedUser struct {
 
 type Protected struct {
 	tokenizer protocol_usecase.Tokenizer
-	auth      *user_usecase.Authorization
+	auth      *auth_usecase.Authorization
 }
 
 func NewProtectedMiddleware(tokenizer protocol_usecase.Tokenizer,
-	auth *user_usecase.Authorization) *Protected {
+	auth *auth_usecase.Authorization) *Protected {
 	return &Protected{
 		tokenizer,
 		auth,
@@ -35,16 +34,13 @@ func (p *Protected) GetMiddleware() func(next http.Handler) http.Handler {
 			responseManager := web_response_manager.NewResponseManager(w)
 			token := r.Header.Get("Authorization")
 
-			fmt.Println("[web_middlewares > Protected > handlerFunc] token:", token)
 			if token == "" {
 				responseManager.RespondUnauthorized()
 				return
 			}
 
-			output, err := p.auth.Execute(&user_usecase.AuthInputDto{Token: token})
-			fmt.Println("[web_middlewares > Protected > handlerFunc] output:", output)
+			output, err := p.auth.Execute(&auth_usecase.AuthInputDto{Token: token})
 			if err != nil {
-				fmt.Println("[web_middlewares > Protected > handlerFunc] err:", err)
 				responseManager.RespondUnauthorized()
 				return
 			}

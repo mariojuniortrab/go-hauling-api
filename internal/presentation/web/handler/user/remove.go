@@ -1,7 +1,6 @@
 package user_handler
 
 import (
-	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
@@ -20,25 +19,21 @@ func NewRemoveHandler(urlParser web_protocol.URLParser,
 }
 
 func (h *removeHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	var input user_usecase.UserRemoveInputDto
-
 	responseManager := web_response_manager.NewResponseManager(w)
 
-	input.ID = h.urlParser.GetPathParamFromURL(r, "id")
+	id := h.urlParser.GetPathParamFromURL(r, "id")
 
-	fmt.Println("[user_handler > removeHandler > Handle] uuid:", input.ID)
-	if input.ID == "" {
+	if id == "" {
 		responseManager.RespondUiidIsRequired()
 	}
 
-	err, errNotFound := h.removeUseCase.Execute(&input)
+	err, errNotFound := h.removeUseCase.Execute(id)
 	if err != nil {
-		fmt.Println("[user_handler > removeHandler > Handle] err:", err)
 		responseManager.RespondInternalServerError(err)
 		return
 	}
 
-	if errNotFound == nil {
+	if errNotFound != nil {
 		responseManager.RespondNotFound("user")
 		return
 	}

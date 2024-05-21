@@ -4,17 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	default_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/default"
 )
-
-type ListUserParams struct {
-	default_entity.List
-	ID                string
-	Name              string
-	WillFilterActives bool
-	Active            bool
-	Email             string
-}
 
 type User struct {
 	ID       string

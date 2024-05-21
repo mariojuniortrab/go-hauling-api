@@ -12,19 +12,20 @@ import (
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
-type list struct {
+type paginate struct {
 	validator protocol_validation.Validator
 	urlParser web_protocol.URLParser
 }
 
-func NewListMiddleware(validator protocol_validation.Validator,
-	urlParser web_protocol.URLParser) *list {
-	return &list{validator, urlParser}
+func NewPaginateMiddleware(validator protocol_validation.Validator,
+	urlParser web_protocol.URLParser) *paginate {
+	return &paginate{validator, urlParser}
 }
 
-func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
+func (p *paginate) GetMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		fn := func(w http.ResponseWriter, r *http.Request) {
 			responseManager := web_response_manager.NewResponseManager(w)
 
 			page := p.urlParser.GetQueryParamFromURL(r, "page")
@@ -32,17 +33,11 @@ func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
 			orderBy := p.urlParser.GetQueryParamFromURL(r, "orderBy")
 			orderType := p.urlParser.GetQueryParamFromURL(r, "orderType")
 
-			fmt.Println("[web_middlewares > list > handlerFunc] page:", page)
-			fmt.Println("[web_middlewares > list > handlerFunc] limit:", limit)
-			fmt.Println("[web_middlewares > list > handlerFunc] orderBy:", orderBy)
-			fmt.Println("[web_middlewares > list > handlerFunc] orderType:", orderType)
-
 			p.validate(page, "page")
 			p.validate(limit, "limit")
 			p.validateOrderFields(orderBy, orderType)
 
 			if p.validator.HasErrors() {
-				fmt.Println("[web_middlewares > list > handlerFunc] hasErrors")
 				responseManager.
 					SetBadRequestStatus().
 					AddErrors(p.validator.GetErrorsAndClean()).
@@ -51,11 +46,13 @@ func (p *list) GetMiddleware() func(next http.Handler) http.Handler {
 			}
 
 			next.ServeHTTP(w, r)
-		})
+		}
+
+		return http.HandlerFunc(fn)
 	}
 }
 
-func (p *list) validate(input, fieldName string) {
+func (p *paginate) validate(input, fieldName string) {
 
 	p.validator.
 		ValidateRequiredField(input, fieldName).
@@ -71,7 +68,7 @@ func (p *list) validate(input, fieldName string) {
 	}
 }
 
-func (p *list) validateOrderFields(orderBy, orderType string) {
+func (p *paginate) validateOrderFields(orderBy, orderType string) {
 	if orderBy == "" && orderType == "" {
 		return
 	}

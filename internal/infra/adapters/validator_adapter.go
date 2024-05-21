@@ -79,7 +79,6 @@ func (v *validatorAdapter) ValidateFieldMinLength(f interface{}, fieldName strin
 func (v *validatorAdapter) defaultLenghValidation(f interface{}, fieldName, flag string, errMessage error) protocol_validation.Validator {
 	err := v.validator.Var(f, flag)
 
-	fmt.Println("err:", err)
 	if err != nil {
 		v.errors = append(v.errors, errors_validation.NewCustomErrorMessage(errMessage, fieldName))
 	}

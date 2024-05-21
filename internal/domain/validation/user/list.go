@@ -1,15 +1,13 @@
 package user_validation
 
 import (
-	"fmt"
-
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type ListValidation interface {
-	Validate(input *user_usecase.ListUserInputDto) []*errors_validation.CustomErrorMessage
+	Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomErrorMessage
 }
 
 type listValidation struct {
@@ -20,8 +18,7 @@ func NewListValidation(validator protocol_validation.Validator) *listValidation 
 	return &listValidation{validator}
 }
 
-func (v *listValidation) Validate(input *user_usecase.ListUserInputDto) []*errors_validation.CustomErrorMessage {
-	fmt.Println("[user_validation > listValidation > Validate] input:", input)
+func (v *listValidation) Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomErrorMessage {
 
 	v.validateEmail(input.Email)
 	v.validateName(input.Name)
@@ -31,7 +28,6 @@ func (v *listValidation) Validate(input *user_usecase.ListUserInputDto) []*error
 		return v.validator.GetErrorsAndClean()
 	}
 
-	fmt.Println("[user_validation > listValidation > Validate] success")
 	return nil
 }
 

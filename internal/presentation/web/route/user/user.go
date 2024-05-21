@@ -1,8 +1,8 @@
 package user_routes
 
 import (
-	"fmt"
-
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	auth_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/auth"
 	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
@@ -26,6 +26,7 @@ func NewRouter(userRepository protocol_usecase.UserRepository,
 	encrypter protocol_usecase.Encrypter,
 	tokenizer protocol_usecase.Tokenizer,
 	urlParser web_protocol.URLParser) *router {
+
 	return &router{
 		userRepository,
 		validator,
@@ -36,37 +37,37 @@ func NewRouter(userRepository protocol_usecase.UserRepository,
 }
 
 func (r *router) Route(route web_protocol.Router) web_protocol.Router {
-	authUseCase := user_usecase.NewAuthorization(r.tokenizer)
-	protected := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase)
-	list := web_middleware.NewListMiddleware(r.validator, infra_adapters.NewChiUrlParserAdapter())
-	uuidUrlParser := web_middleware.NewUuidParser(r.urlParser)
+	authUseCase := auth_usecase.NewAuthorization(r.tokenizer)
+	protectedMiddleware := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase).GetMiddleware()
+	paginateMiddleware := web_middleware.NewPaginateMiddleware(r.validator, infra_adapters.NewChiUrlParserAdapter()).GetMiddleware()
+	uuidUrlParserMiddleware := web_middleware.NewUuidParser(r.urlParser).GetMiddleware()
 
-	route.Group(func(rr web_protocol.Router) {
-		rr.Use(protected.GetMiddleware())
-		rr.Use(list.GetMiddleware())
+	var userUpdateInputDto user_entity.UserUpdateInputDto
+	bodyValidatorMiddleware := web_middleware.NewBodyValidator(&userUpdateInputDto).GetMiddleware()
 
-		rr.Get("/user", r.getListHandler().Handle)
-	})
+	route.Route("/user", func(rr web_protocol.Router) {
+		rr.Use(protectedMiddleware)
 
-	route.Group(func(rr web_protocol.Router) {
-		rr.Use(protected.GetMiddleware())
-		rr.Use(uuidUrlParser.GetMiddleware())
+		rr.With(paginateMiddleware).Get("/", r.getListHandler().Handle)
 
-		rr.Get("/user/{id}", r.getDetailHandler().Handle)
-		rr.Delete("/user/{id}", r.getRemoveHandler().Handle)
-		rr.Patch("/user/{id}", r.getUpdateHandler().Handle)
+		rr.Group(func(rrr web_protocol.Router) {
+			rrr.Use(uuidUrlParserMiddleware)
+
+			rrr.Get("/{id}", r.getDetailHandler().Handle)
+			rrr.Delete("/{id}", r.getRemoveHandler().Handle)
+
+			rrr.With(bodyValidatorMiddleware).Patch("/{id}", r.getUpdateHandler().Handle)
+		})
 	})
 
 	route.Post("/signup", r.getSignupHandler().Handle)
 	route.Post("/login", r.getLoginHandler().Handle)
-
-	fmt.Println("[user_routes > router > Route] routes up")
 	return route
 }
 
 func (r *router) getSignupHandler() web_protocol.Handle {
 	signUpValidation := user_validation.NewSignUpValidation(r.validator, r.userRepository)
-	signUpUseCase := user_usecase.NewSignupUseCase(r.userRepository, r.encrypter)
+	signUpUseCase := auth_usecase.NewSignupUseCase(r.userRepository, r.encrypter)
 	signupHandler := user_handler.NewSignupHandler(signUpValidation, signUpUseCase)
 
 	return signupHandler
@@ -74,7 +75,7 @@ func (r *router) getSignupHandler() web_protocol.Handle {
 
 func (r *router) getLoginHandler() web_protocol.Handle {
 	loginValidation := user_validation.NewLoginValidation(r.validator, r.encrypter)
-	loginUseCase := user_usecase.NewLoginUseCase(r.userRepository, r.tokenizer)
+	loginUseCase := auth_usecase.NewLoginUseCase(r.userRepository, r.tokenizer)
 	signupHandler := user_handler.NewLoginHandle(loginValidation, loginUseCase)
 
 	return signupHandler
@@ -105,7 +106,7 @@ func (r *router) getRemoveHandler() web_protocol.Handle {
 func (r *router) getUpdateHandler() web_protocol.Handle {
 	updateValidation := user_validation.NewUpdateValidation(r.validator)
 	updateUseCase := user_usecase.NewUpdateUserUsecase(r.userRepository)
-	userHandler := user_handler.NewUpdateHandler(r.urlParser, updateUseCase, updateValidation)
+	updateHandler := user_handler.NewUpdateHandler(r.urlParser, updateUseCase, updateValidation)
 
-	return userHandler
+	return updateHandler
 }

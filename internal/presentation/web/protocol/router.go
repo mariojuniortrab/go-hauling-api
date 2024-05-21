@@ -21,4 +21,7 @@ type Router interface {
 	Put(pattern string, h http.HandlerFunc)
 	Trace(pattern string, h http.HandlerFunc)
 	GetPathParamFromURL(r *http.Request, key string) string
+
+	//Print
+	PrintRoutes()
 }

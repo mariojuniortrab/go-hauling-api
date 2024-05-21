@@ -1,4 +1,4 @@
-package util_usecase
+package util_entity
 
 import "time"
 
