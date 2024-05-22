@@ -2,7 +2,6 @@ package user_handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
@@ -30,15 +29,15 @@ func (h *updateHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	editedUser, err := h.updateUseCase.GetForUpdate(id)
 	if err != nil {
 		responseManager.RespondInternalServerError(err)
+		return
 	}
 	if editedUser == nil {
 		responseManager.RespondNotFound("user")
 		return
 	}
 
-	fmt.Printf("r.Body: %+v\n", r.Body)
 	err = json.NewDecoder(r.Body).Decode(editedUser)
-	fmt.Println("Decodou:", editedUser)
+
 	if err != nil {
 		responseManager.RespondInternalServerError(err)
 		return

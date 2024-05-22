@@ -30,8 +30,13 @@ func (u *UpdateUserUseCase) Execute(id string, input *user_entity.UserUpdateInpu
 
 func (u *UpdateUserUseCase) GetForUpdate(id string) (*user_entity.UserUpdateInputDto, error) {
 	user, err := u.userRepository.GetById(id)
+
 	if err != nil {
 		return nil, err
+	}
+
+	if user == nil {
+		return nil, nil
 	}
 
 	return user_entity.NewUserUpdateInputDto(user), err
