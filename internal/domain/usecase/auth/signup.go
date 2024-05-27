@@ -4,34 +4,35 @@ import (
 	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
+	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 )
 
 type Signup struct {
-	userRepository protocol_usecase.UserRepository
-	encrypter      protocol_usecase.Encrypter
+	repository protocol_data.SignupRepository
+	encrypter  protocol_application.Encrypter
 }
 
-func NewSignupUseCase(userRepository protocol_usecase.UserRepository,
-	encrypter protocol_usecase.Encrypter) *Signup {
-	return &Signup{userRepository, encrypter}
+func NewSignupUseCase(repository protocol_data.SignupRepository,
+	encrypter protocol_application.Encrypter) *Signup {
+	return &Signup{repository, encrypter}
 }
 
-func (s *Signup) Execute(input *auth_entity.SignupInputDto) (*auth_entity.SignupOutputDto, error) {
+func (u *Signup) Execute(input *auth_entity.SignupInputDto) (*auth_entity.SignupOutputDto, error) {
 
-	formattedDate, err := util_entity.GetDateFromString(input.Birth)
+	formattedDate, err := util_entity.GetDateFromString(*input.Birth)
 	if err != nil {
 		return nil, err
 	}
 
-	hashPassword, err := s.encrypter.Hash(input.Password)
+	hashPassword, err := u.encrypter.Hash(*input.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	user := user_entity.NewUser(input.Name, hashPassword, input.Email, formattedDate)
+	user := user_entity.NewUser(*input.Name, hashPassword, *input.Email, formattedDate)
 
-	err = s.userRepository.Create(user)
+	err = u.repository.Create(user)
 	if err != nil {
 		return nil, err
 	}

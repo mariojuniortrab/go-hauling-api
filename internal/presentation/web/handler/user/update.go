@@ -4,65 +4,57 @@ import (
 	"encoding/json"
 	"net/http"
 
+	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type updateHandler struct {
-	urlParser        web_protocol.URLParser
+	urlParser        protocol_application.URLParser
 	updateUseCase    *user_usecase.UpdateUserUseCase
 	updateValidation user_validation.UpdateValidation
 }
 
-func NewUpdateHandler(urlParser web_protocol.URLParser,
+func NewUpdateHandler(urlParser protocol_application.URLParser,
 	updateUseCase *user_usecase.UpdateUserUseCase,
 	updateValidation user_validation.UpdateValidation) *updateHandler {
 	return &updateHandler{urlParser, updateUseCase, updateValidation}
 }
 
 func (h *updateHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	responseManager := web_response_manager.NewResponseManager(w)
 	id := h.urlParser.GetPathParamFromURL(r, "id")
 
-	editedUser, err := h.updateUseCase.GetForUpdate(id)
+	var payload user_entity.UserUpdateInputDto
+
+	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
+		return
+	}
+
+	validationErrs := h.updateValidation.Validate(&payload)
+	if validationErrs != nil {
+		web_response_manager.RespondFieldErrorValidation(w, validationErrs)
+		return
+	}
+
+	editedUser, err := h.updateUseCase.GetEditedUser(id, &payload)
+	if err != nil {
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 	if editedUser == nil {
-		responseManager.RespondNotFound("user")
-		return
-	}
-
-	err = json.NewDecoder(r.Body).Decode(editedUser)
-
-	if err != nil {
-		responseManager.RespondInternalServerError(err)
-		return
-	}
-
-	emptyRequestError, validationErrs := h.updateValidation.Validate(editedUser)
-	if validationErrs != nil {
-		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
-		return
-	}
-	if emptyRequestError != nil {
-		responseManager.SetBadRequestStatus().AddError(emptyRequestError).Respond()
+		web_response_manager.RespondNotFound(w, "user")
 		return
 	}
 
 	result, err := h.updateUseCase.Execute(id, editedUser)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
-	if result == nil {
-		responseManager.RespondNotFound("user")
-		return
-	}
-
-	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
+	web_response_manager.RespondOk(w, "success", result)
 }

@@ -1,37 +1,59 @@
 package user_validation
 
 import (
+	"log"
+
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
-	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type UpdateValidation interface {
-	Validate(input *user_entity.UserUpdateInputDto) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage)
+	Validate(input *user_entity.UserUpdateInputDto) []*errors_validation.CustomFieldErrorMessage
 }
 type updateValidation struct {
-	validator protocol_validation.Validator
+	validator protocol_application.Validator
 }
 
-func NewUpdateValidation(validator protocol_validation.Validator) *updateValidation {
+func NewUpdateValidation(validator protocol_application.Validator) *updateValidation {
 	return &updateValidation{
 		validator,
 	}
 }
 
-func (v *updateValidation) Validate(input *user_entity.UserUpdateInputDto) (*errors_validation.CustomErrorMessage, []*errors_validation.CustomErrorMessage) {
+func (v *updateValidation) Validate(input *user_entity.UserUpdateInputDto) []*errors_validation.CustomFieldErrorMessage {
+	log.Printf("input: %v \n", input)
 
-	v.validatePassword(input.Password)
-	v.validateName(input.Name)
-	v.validateBirth(input.Birth)
-	v.validatePasswordConfirmation(input.PasswordConfirmation, input.Password)
-
-	if v.validator.HasErrors() {
-		return nil, v.validator.GetErrorsAndClean()
+	if input.Password != nil {
+		v.validatePassword(*input.Password)
 	}
 
-	return nil, nil
+	if input.Name != nil {
+		v.validateName(*input.Name)
+	}
+
+	if input.Birth != nil {
+		v.validateBirth(*input.Birth)
+	}
+
+	if input.PasswordConfirmation != nil && input.Password != nil {
+		v.validatePasswordConfirmation(*input.PasswordConfirmation, *input.Password)
+	}
+
+	if input.PasswordConfirmation != nil && input.Password == nil {
+		v.validator.AddError(errors_validation.IsRequired("password"), "password")
+	}
+
+	if input.PasswordConfirmation == nil && input.Password != nil {
+		v.validator.AddError(errors_validation.IsRequired("passwordConfirmation"), "passwordConfirmation")
+	}
+
+	if v.validator.HasErrors() {
+		return v.validator.GetErrorsAndClean()
+	}
+
+	return nil
 }
 
 func (v *updateValidation) validatePassword(input string) {

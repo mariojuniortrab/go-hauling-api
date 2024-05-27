@@ -26,36 +26,34 @@ func NewSignupHandler(signUpValidation user_validation.SignupValidation,
 func (h *signupHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var input auth_entity.SignupInputDto
 
-	responseManager := web_response_manager.NewResponseManager(w)
-
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
 	validationErrs := h.signUpValidation.Validate(&input)
 	if validationErrs != nil {
-		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
+		web_response_manager.RespondFieldErrorValidation(w, validationErrs)
 		return
 	}
 
-	alreadyExistsErr, err := h.signUpValidation.AlreadyExists(input.Email, "")
+	alreadyExistsErr, err := h.signUpValidation.AlreadyExists(*input.Email, "")
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
 	if alreadyExistsErr != nil {
-		responseManager.SetConflictStatus().AddError(alreadyExistsErr).Respond()
+		web_response_manager.RespondConflictError(w, alreadyExistsErr)
 		return
 	}
 
 	output, err := h.signUp.Execute(&input)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
-	responseManager.SetStatusCreated().SetMessage("user created").SetData(output).Respond()
+	web_response_manager.RespondCreated(w, "created", output)
 }

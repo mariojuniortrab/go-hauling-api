@@ -2,23 +2,23 @@ package user_validation
 
 import (
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
-	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type ListValidation interface {
-	Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomErrorMessage
+	Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomFieldErrorMessage
 }
 
 type listValidation struct {
-	validator protocol_validation.Validator
+	validator protocol_application.Validator
 }
 
-func NewListValidation(validator protocol_validation.Validator) *listValidation {
+func NewListValidation(validator protocol_application.Validator) *listValidation {
 	return &listValidation{validator}
 }
 
-func (v *listValidation) Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomErrorMessage {
+func (v *listValidation) Validate(input *user_entity.ListUserInputDto) []*errors_validation.CustomFieldErrorMessage {
 
 	v.validateEmail(input.Email)
 	v.validateName(input.Name)

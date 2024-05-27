@@ -16,11 +16,11 @@ func NewJwtAdapter() *jwtAdapter {
 	return &jwtAdapter{}
 }
 
-func (j *jwtAdapter) GenerateToken(id string, email string) (string, error) {
+func (j *jwtAdapter) GenerateToken(id string, email string, timeToExpire int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"id":    id,
-		"exp":   time.Now().Add(time.Hour + 1).Unix(),
+		"exp":   time.Now().Add(time.Hour + time.Duration(timeToExpire)).Unix(),
 	})
 
 	return token.SignedString([]byte(secretKey))

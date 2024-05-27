@@ -1,4 +1,4 @@
-package protocol_usecase
+package protocol_application
 
 type List struct {
 	Limit     string

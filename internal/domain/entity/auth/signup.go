@@ -1,16 +1,25 @@
 package auth_entity
 
 import (
+	protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 )
 
 type SignupInputDto struct {
-	Password             string `json:"password"`
-	Name                 string `json:"name"`
-	PasswordConfirmation string `json:"passwordConfirmation"`
-	Email                string `json:"email"`
-	Birth                string `json:"birth"`
+	Password             *string `json:"password"`
+	Name                 *string `json:"name"`
+	PasswordConfirmation *string `json:"passwordConfirmation"`
+	Email                *string `json:"email"`
+	Birth                *string `json:"birth"`
+}
+
+func (u SignupInputDto) IsEmpty() bool {
+	return u == SignupInputDto{}
+}
+
+func (u *SignupInputDto) New() protocol_entity.Emptyable {
+	return &SignupInputDto{}
 }
 
 type SignupOutputDto struct {

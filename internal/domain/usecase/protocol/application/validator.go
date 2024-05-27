@@ -1,4 +1,4 @@
-package protocol_validation
+package protocol_application
 
 import (
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
@@ -16,6 +16,6 @@ type Validator interface {
 	ValidateStringBooleanField(interface{}, string) Validator
 	HasErrors() bool
 	AddError(error, string) Validator
-	GetErrors() []*errors_validation.CustomErrorMessage
-	GetErrorsAndClean() []*errors_validation.CustomErrorMessage
+	GetErrors() []*errors_validation.CustomFieldErrorMessage
+	GetErrorsAndClean() []*errors_validation.CustomFieldErrorMessage
 }

@@ -4,21 +4,21 @@ import (
 	"net/http"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
 	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type listHandler struct {
 	listUseCase    *user_usecase.List
 	listValidation user_validation.ListValidation
-	urlParser      web_protocol.URLParser
+	urlParser      protocol_application.URLParser
 }
 
 func NewListHandler(listUseCase *user_usecase.List,
 	listValidation user_validation.ListValidation,
-	urlParser web_protocol.URLParser) *listHandler {
+	urlParser protocol_application.URLParser) *listHandler {
 	return &listHandler{
 		listUseCase,
 		listValidation,
@@ -29,23 +29,20 @@ func NewListHandler(listUseCase *user_usecase.List,
 func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	var input user_entity.ListUserInputDto
 
-	responseManager := web_response_manager.NewResponseManager(w)
-
 	h.parseUrlParams(r, &input)
 
 	validationErrs := h.listValidation.Validate(&input)
 	if validationErrs != nil {
-		responseManager.SetBadRequestStatus().AddErrors(validationErrs).Respond()
+		web_response_manager.RespondFieldErrorValidation(w, validationErrs)
 		return
 	}
 
 	result, err := h.listUseCase.Execute(&input)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
-
-	responseManager.SetStatusOk().SetMessage("success").SetData(result).Respond()
+	web_response_manager.RespondOk(w, "success", result)
 }
 
 func (h *listHandler) parseUrlParams(r *http.Request, input *user_entity.ListUserInputDto) {

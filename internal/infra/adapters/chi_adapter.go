@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 )
 
 type chiRouteAdapter struct {
@@ -22,11 +22,11 @@ func (a *chiRouteAdapter) Use(middlewares ...func(http.Handler) http.Handler) {
 	a.chi.Use(middlewares...)
 }
 
-func (a *chiRouteAdapter) With(middlewares ...func(http.Handler) http.Handler) web_protocol.Router {
+func (a *chiRouteAdapter) With(middlewares ...func(http.Handler) http.Handler) protocol_application.Router {
 	return &chiRouteAdapter{chi: a.chi.With(middlewares...)}
 }
 
-func (a *chiRouteAdapter) Route(pattern string, fn func(r web_protocol.Router)) web_protocol.Router {
+func (a *chiRouteAdapter) Route(pattern string, fn func(r protocol_application.Router)) protocol_application.Router {
 	chiFn := func(r chi.Router) {
 		newAdapter := &chiRouteAdapter{
 			chi: r,
@@ -38,7 +38,7 @@ func (a *chiRouteAdapter) Route(pattern string, fn func(r web_protocol.Router)) 
 	return a
 }
 
-func (a *chiRouteAdapter) Group(fn func(r web_protocol.Router)) web_protocol.Router {
+func (a *chiRouteAdapter) Group(fn func(r protocol_application.Router)) protocol_application.Router {
 	chiFn := func(r chi.Router) {
 		newAdapter := &chiRouteAdapter{
 			chi: r,

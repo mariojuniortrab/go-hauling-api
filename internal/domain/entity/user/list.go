@@ -1,6 +1,6 @@
 package user_entity
 
-import protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/default"
+import protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
 
 type ListUserParams struct {
 	protocol_entity.List

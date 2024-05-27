@@ -3,33 +3,33 @@ package user_validation
 import (
 	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
+	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
-	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
 )
 
 type SignupValidation interface {
-	Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomErrorMessage
-	AlreadyExists(email, id string) (*errors_validation.CustomErrorMessage, error)
+	Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomFieldErrorMessage
+	AlreadyExists(email, id string) (*errors_validation.CustomFieldErrorMessage, error)
 }
 type signUpValidation struct {
-	validator      protocol_validation.Validator
-	userRepository protocol_usecase.UserRepository
+	validator  protocol_application.Validator
+	repository protocol_data.SignupRepository
 }
 
-func NewSignUpValidation(validator protocol_validation.Validator, signupRepository protocol_usecase.UserRepository) *signUpValidation {
+func NewSignUpValidation(validator protocol_application.Validator, repository protocol_data.SignupRepository) *signUpValidation {
 	return &signUpValidation{
 		validator,
-		signupRepository,
+		repository,
 	}
 }
 
-func (v *signUpValidation) Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomErrorMessage {
-	v.validateEmail(input.Email)
-	v.validatePassword(input.Password)
-	v.validateName(input.Name)
-	v.validateBirth(input.Birth)
-	v.validatePasswordConfirmation(input.PasswordConfirmation, input.Password)
+func (v *signUpValidation) Validate(input *auth_entity.SignupInputDto) []*errors_validation.CustomFieldErrorMessage {
+	v.validateEmail(*input.Email)
+	v.validatePassword(*input.Password)
+	v.validateName(*input.Name)
+	v.validateBirth(*input.Birth)
+	v.validatePasswordConfirmation(*input.PasswordConfirmation, *input.Password)
 
 	if v.validator.HasErrors() {
 		return v.validator.GetErrorsAndClean()
@@ -38,15 +38,15 @@ func (v *signUpValidation) Validate(input *auth_entity.SignupInputDto) []*errors
 	return nil
 }
 
-func (v *signUpValidation) AlreadyExists(email, id string) (*errors_validation.CustomErrorMessage, error) {
-	exists, err := v.userRepository.GetByEmail(email, id)
+func (v *signUpValidation) AlreadyExists(email, id string) (*errors_validation.CustomFieldErrorMessage, error) {
+	exists, err := v.repository.GetByEmail(email, id)
 
 	if err != nil {
 		return nil, err
 	}
 
 	if exists != nil {
-		return errors_validation.NewCustomErrorMessage(errors_validation.AlreadyExists("user"), "email"), nil
+		return errors_validation.NewCustomFieldErrorMessage(errors_validation.AlreadyExists("user"), "email"), nil
 	}
 
 	return nil, nil

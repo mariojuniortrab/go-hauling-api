@@ -1,112 +1,81 @@
 package user_routes
 
 import (
+	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
-	auth_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/auth"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
-	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
-	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
-	user_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/user"
-	infra_adapters "github.com/mariojuniortrab/hauling-api/internal/infra/adapters"
-	user_handler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/handler/user"
-	web_middleware "github.com/mariojuniortrab/hauling-api/internal/presentation/web/middleware"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
+	web_assembler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/asembler"
 )
 
 type router struct {
-	userRepository protocol_usecase.UserRepository
-	validator      protocol_validation.Validator
-	encrypter      protocol_usecase.Encrypter
-	tokenizer      protocol_usecase.Tokenizer
-	urlParser      web_protocol.URLParser
+	userAssembler       *web_assembler.UserAssembler
+	middlewareAssembler *web_assembler.MiddlewareAssembler
 }
 
-func NewRouter(userRepository protocol_usecase.UserRepository,
-	validator protocol_validation.Validator,
-	encrypter protocol_usecase.Encrypter,
-	tokenizer protocol_usecase.Tokenizer,
-	urlParser web_protocol.URLParser) *router {
-
+func NewRouter(
+	userAssembler *web_assembler.UserAssembler,
+	middlewareAssembler *web_assembler.MiddlewareAssembler,
+) *router {
 	return &router{
-		userRepository,
-		validator,
-		encrypter,
-		tokenizer,
-		urlParser,
+		userAssembler,
+		middlewareAssembler,
 	}
 }
 
-func (r *router) Route(route web_protocol.Router) web_protocol.Router {
-	authUseCase := auth_usecase.NewAuthorization(r.tokenizer)
-	protectedMiddleware := web_middleware.NewProtectedMiddleware(r.tokenizer, authUseCase).GetMiddleware()
-	paginateMiddleware := web_middleware.NewPaginateMiddleware(r.validator, infra_adapters.NewChiUrlParserAdapter()).GetMiddleware()
-	uuidUrlParserMiddleware := web_middleware.NewUuidParser(r.urlParser).GetMiddleware()
+func (r *router) Route(route protocol_application.Router) protocol_application.Router {
 
-	var userUpdateInputDto user_entity.UserUpdateInputDto
-	bodyValidatorMiddleware := web_middleware.NewBodyValidator(&userUpdateInputDto).GetMiddleware()
+	r.routeLogin(route)
+	r.routeSignup(route)
 
-	route.Route("/user", func(rr web_protocol.Router) {
-		rr.Use(protectedMiddleware)
+	route.Route("/user", func(rr protocol_application.Router) {
+		protected := r.middlewareAssembler.GetAssembledProtectedMiddleware()
+		rr.Use(protected)
 
-		rr.With(paginateMiddleware).Get("/", r.getListHandler().Handle)
+		r.routeListUser(rr)
 
-		rr.Group(func(rrr web_protocol.Router) {
-			rrr.Use(uuidUrlParserMiddleware)
+		rr.Group(func(rrr protocol_application.Router) {
+			uuidParser := r.middlewareAssembler.GetAssembledUuidParserMiddleware()
+			rrr.Use(uuidParser)
 
-			rrr.Get("/{id}", r.getDetailHandler().Handle)
-			rrr.Delete("/{id}", r.getRemoveHandler().Handle)
+			r.routeGetUser(rrr)
+			r.routeDeleteUser(rrr)
 
-			rrr.With(bodyValidatorMiddleware).Patch("/{id}", r.getUpdateHandler().Handle)
+			var userUpdateInputDto user_entity.UserUpdateInputDto
+			updateBodyValidation := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&userUpdateInputDto)
+			rrr.With(updateBodyValidation).Patch("/{id}", r.userAssembler.GetAssembledUpdateUserHandle())
 		})
 	})
 
-	route.Post("/signup", r.getSignupHandler().Handle)
-	route.Post("/login", r.getLoginHandler().Handle)
 	return route
 }
 
-func (r *router) getSignupHandler() web_protocol.Handle {
-	signUpValidation := user_validation.NewSignUpValidation(r.validator, r.userRepository)
-	signUpUseCase := auth_usecase.NewSignupUseCase(r.userRepository, r.encrypter)
-	signupHandler := user_handler.NewSignupHandler(signUpValidation, signUpUseCase)
-
-	return signupHandler
+func (r *router) routeSignup(route protocol_application.Router) {
+	var signupInputDto auth_entity.SignupInputDto
+	bodyValidator := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&signupInputDto)
+	route.With(bodyValidator).Post("/signup", r.userAssembler.GetAssembledSignupHandle())
 }
 
-func (r *router) getLoginHandler() web_protocol.Handle {
-	loginValidation := user_validation.NewLoginValidation(r.validator, r.encrypter)
-	loginUseCase := auth_usecase.NewLoginUseCase(r.userRepository, r.tokenizer)
-	signupHandler := user_handler.NewLoginHandle(loginValidation, loginUseCase)
-
-	return signupHandler
+func (r *router) routeLogin(route protocol_application.Router) {
+	var loginInputDto auth_entity.LoginInputDto
+	bodyValidator := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&loginInputDto)
+	route.With(bodyValidator).Post("/login", r.userAssembler.GetAssembledLoginHandle())
 }
 
-func (r *router) getListHandler() web_protocol.Handle {
-	listValidation := user_validation.NewListValidation(r.validator)
-	listUseCase := user_usecase.NewListUseCase(r.userRepository)
-	listHandler := user_handler.NewListHandler(listUseCase, listValidation, r.urlParser)
-
-	return listHandler
+func (r *router) routeListUser(route protocol_application.Router) {
+	paginate := r.middlewareAssembler.GetAssembledPaginatedMiddleware()
+	route.With(paginate).Get("/", r.userAssembler.GetAssembledListUserHandle())
 }
 
-func (r *router) getDetailHandler() web_protocol.Handle {
-	detailUseCase := user_usecase.NewDetailuserUsecase(r.userRepository)
-	detailHandler := user_handler.NewDetailHandler(r.urlParser, detailUseCase)
-
-	return detailHandler
+func (r *router) routeGetUser(route protocol_application.Router) {
+	route.Get("/{id}", r.userAssembler.GetAssembledDetailUserHandle())
 }
 
-func (r *router) getRemoveHandler() web_protocol.Handle {
-	removeUseCase := user_usecase.NewRemoveUserUsecase(r.userRepository)
-	removeHandler := user_handler.NewRemoveHandler(r.urlParser, removeUseCase)
-
-	return removeHandler
+func (r *router) routeDeleteUser(route protocol_application.Router) {
+	route.Delete("/{id}", r.userAssembler.GetAssembledRemoveUserHandle())
 }
 
-func (r *router) getUpdateHandler() web_protocol.Handle {
-	updateValidation := user_validation.NewUpdateValidation(r.validator)
-	updateUseCase := user_usecase.NewUpdateUserUsecase(r.userRepository)
-	updateHandler := user_handler.NewUpdateHandler(r.urlParser, updateUseCase, updateValidation)
-
-	return updateHandler
+func (r *router) routeUpdateUser(route protocol_application.Router) {
+	var userUpdateInputDto user_entity.UserUpdateInputDto
+	updateBodyValidation := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&userUpdateInputDto)
+	route.With(updateBodyValidation).Patch("/{id}", r.userAssembler.GetAssembledUpdateUserHandle())
 }

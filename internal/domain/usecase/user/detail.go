@@ -2,19 +2,19 @@ package user_usecase
 
 import (
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 )
 
 type DetailUserUseCase struct {
-	userRepository protocol_usecase.UserRepository
+	repository protocol_data.DetailUserRepository
 }
 
-func NewDetailuserUsecase(userRepository protocol_usecase.UserRepository) *DetailUserUseCase {
-	return &DetailUserUseCase{userRepository}
+func NewDetailuserUsecase(repository protocol_data.DetailUserRepository) *DetailUserUseCase {
+	return &DetailUserUseCase{repository}
 }
 
 func (u *DetailUserUseCase) Execute(id string) (*user_entity.UserDetailOutputDto, error) {
-	user, err := u.userRepository.GetById(id)
+	user, err := u.repository.GetById(id)
 
 	if err != nil {
 		return nil, err

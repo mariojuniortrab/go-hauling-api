@@ -7,49 +7,41 @@ import (
 	"strconv"
 	"strings"
 
-	protocol_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/protocol"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type paginate struct {
-	validator protocol_validation.Validator
-	urlParser web_protocol.URLParser
+	validator protocol_application.Validator
+	urlParser protocol_application.URLParser
 }
 
-func NewPaginateMiddleware(validator protocol_validation.Validator,
-	urlParser web_protocol.URLParser) *paginate {
+func NewPaginateMiddleware(validator protocol_application.Validator,
+	urlParser protocol_application.URLParser) *paginate {
 	return &paginate{validator, urlParser}
 }
 
-func (p *paginate) GetMiddleware() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
+func (m *paginate) Middleware(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			responseManager := web_response_manager.NewResponseManager(w)
+		page := m.urlParser.GetQueryParamFromURL(r, "page")
+		limit := m.urlParser.GetQueryParamFromURL(r, "limit")
+		orderBy := m.urlParser.GetQueryParamFromURL(r, "orderBy")
+		orderType := m.urlParser.GetQueryParamFromURL(r, "orderType")
 
-			page := p.urlParser.GetQueryParamFromURL(r, "page")
-			limit := p.urlParser.GetQueryParamFromURL(r, "limit")
-			orderBy := p.urlParser.GetQueryParamFromURL(r, "orderBy")
-			orderType := p.urlParser.GetQueryParamFromURL(r, "orderType")
+		m.validate(page, "page")
+		m.validate(limit, "limit")
+		m.validateOrderFields(orderBy, orderType)
 
-			p.validate(page, "page")
-			p.validate(limit, "limit")
-			p.validateOrderFields(orderBy, orderType)
-
-			if p.validator.HasErrors() {
-				responseManager.
-					SetBadRequestStatus().
-					AddErrors(p.validator.GetErrorsAndClean()).
-					Respond()
-				return
-			}
-
-			next.ServeHTTP(w, r)
+		if m.validator.HasErrors() {
+			web_response_manager.RespondFieldErrorValidation(w, m.validator.GetErrorsAndClean())
+			return
 		}
 
-		return http.HandlerFunc(fn)
+		next.ServeHTTP(w, r)
 	}
+
+	return http.HandlerFunc(fn)
 }
 
 func (p *paginate) validate(input, fieldName string) {

@@ -1,4 +1,4 @@
-package web_protocol
+package protocol_application
 
 import "net/http"
 

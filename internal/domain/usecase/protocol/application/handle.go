@@ -1,7 +1,7 @@
-package web_protocol
+package protocol_application
 
 import "net/http"
 
-type Handle interface {
+type Handler interface {
 	Handle(w http.ResponseWriter, r *http.Request)
 }

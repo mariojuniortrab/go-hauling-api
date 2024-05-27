@@ -2,15 +2,15 @@ package user_usecase
 
 import (
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 )
 
 type List struct {
-	userRepository protocol_usecase.UserRepository
+	repository protocol_data.ListUserRepository
 }
 
-func NewListUseCase(userRepository protocol_usecase.UserRepository) *List {
-	return &List{userRepository}
+func NewListUseCase(repository protocol_data.ListUserRepository) *List {
+	return &List{repository}
 }
 
 func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOutputDto, error) {
@@ -19,7 +19,7 @@ func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOu
 		return nil, err
 	}
 
-	users, err := u.userRepository.List(listUserParams)
+	users, err := u.repository.List(listUserParams)
 	if err != nil {
 		return nil, err
 	}

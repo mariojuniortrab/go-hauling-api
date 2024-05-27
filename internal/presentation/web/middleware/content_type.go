@@ -16,13 +16,12 @@ func NewContentType() *contentType {
 func (p *contentType) GetMiddleware() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			responseManager := web_response_manager.NewResponseManager(w)
 
 			ct := r.Header.Get("Content-Type")
 			if ct != "" {
 				mediaType := strings.ToLower(strings.TrimSpace(strings.Split(ct, ";")[0]))
 				if mediaType != "application/json" {
-					responseManager.RespondUnsupportedMediaType()
+					web_response_manager.RespondUnsupportedMediaType(w)
 					return
 				}
 			}

@@ -3,19 +3,19 @@ package user_usecase
 import (
 	"errors"
 
-	protocol_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol"
+	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 )
 
 type RemoveUserUseCase struct {
-	userRepository protocol_usecase.UserRepository
+	repository protocol_data.RemoveUserRepository
 }
 
-func NewRemoveUserUsecase(userRepository protocol_usecase.UserRepository) *RemoveUserUseCase {
-	return &RemoveUserUseCase{userRepository}
+func NewRemoveUserUsecase(repository protocol_data.RemoveUserRepository) *RemoveUserUseCase {
+	return &RemoveUserUseCase{repository}
 }
 
 func (u *RemoveUserUseCase) Execute(id string) (error, error) {
-	user, err := u.userRepository.GetById(id)
+	user, err := u.repository.GetById(id)
 
 	if err != nil {
 		return err, nil
@@ -25,7 +25,7 @@ func (u *RemoveUserUseCase) Execute(id string) (error, error) {
 		return nil, errors.New("not found")
 	}
 
-	err = u.userRepository.Remove(id)
+	err = u.repository.Remove(id)
 	if err != nil {
 		return err, nil
 	}

@@ -3,40 +3,38 @@ package user_handler
 import (
 	"net/http"
 
+	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	user_usecase "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/user"
-	web_protocol "github.com/mariojuniortrab/hauling-api/internal/presentation/web/protocol"
 	web_response_manager "github.com/mariojuniortrab/hauling-api/internal/presentation/web/response-manager"
 )
 
 type removeHandler struct {
-	urlParser     web_protocol.URLParser
+	urlParser     protocol_application.URLParser
 	removeUseCase *user_usecase.RemoveUserUseCase
 }
 
-func NewRemoveHandler(urlParser web_protocol.URLParser,
+func NewRemoveHandler(urlParser protocol_application.URLParser,
 	removeUseCase *user_usecase.RemoveUserUseCase) *removeHandler {
 	return &removeHandler{urlParser, removeUseCase}
 }
 
 func (h *removeHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	responseManager := web_response_manager.NewResponseManager(w)
-
 	id := h.urlParser.GetPathParamFromURL(r, "id")
 
 	if id == "" {
-		responseManager.RespondUiidIsRequired()
+		web_response_manager.RespondUiidIsRequired(w)
 	}
 
 	err, errNotFound := h.removeUseCase.Execute(id)
 	if err != nil {
-		responseManager.RespondInternalServerError(err)
+		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
 	if errNotFound != nil {
-		responseManager.RespondNotFound("user")
+		web_response_manager.RespondNotFound(w, "user")
 		return
 	}
 
-	responseManager.SetStatusOk().SetMessage("removed").Respond()
+	web_response_manager.RespondOk(w, "removed", nil)
 }

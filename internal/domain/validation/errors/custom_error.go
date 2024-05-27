@@ -2,12 +2,21 @@ package errors_validation
 
 type CustomErrorMessage struct {
 	Message string
-	Field   string
 }
 
-func NewCustomErrorMessage(err error, field string) *CustomErrorMessage {
-	return &CustomErrorMessage{
-		Message: err.Error(),
-		Field:   field,
-	}
+type CustomFieldErrorMessage struct {
+	CustomErrorMessage
+	Field string
+}
+
+func NewCustomFieldErrorMessage(err error, field string) *CustomFieldErrorMessage {
+	errorMessage := &CustomFieldErrorMessage{Field: field}
+	errorMessage.Message = err.Error()
+	return errorMessage
+}
+
+func NewCustomErrorMessage(err error) *CustomErrorMessage {
+	errorMessage := &CustomErrorMessage{}
+	errorMessage.Message = err.Error()
+	return errorMessage
 }
