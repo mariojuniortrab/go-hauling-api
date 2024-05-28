@@ -16,7 +16,7 @@ type messageSucessful struct {
 
 type messageList struct {
 	messageSucessful
-	total int `json:"total"`
+	Total int `json:"total"`
 }
 
 type messageFieldErrorArray struct {
