@@ -7,15 +7,17 @@ import (
 )
 
 type RemoveUserUseCase struct {
-	repository protocol_data.RemoveUserRepository
+	getByIdRepostory protocol_data.GetUserByIdRepository
+	removeRepository protocol_data.RemoveUserRepository
 }
 
-func NewRemoveUserUsecase(repository protocol_data.RemoveUserRepository) *RemoveUserUseCase {
-	return &RemoveUserUseCase{repository}
+func NewRemoveUserUsecase(getByIdRepostory protocol_data.GetUserByIdRepository,
+	removeRepository protocol_data.RemoveUserRepository) *RemoveUserUseCase {
+	return &RemoveUserUseCase{getByIdRepostory, removeRepository}
 }
 
 func (u *RemoveUserUseCase) Execute(id string) (error, error) {
-	user, err := u.repository.GetById(id)
+	user, err := u.getByIdRepostory.GetById(id)
 
 	if err != nil {
 		return err, nil
@@ -25,7 +27,7 @@ func (u *RemoveUserUseCase) Execute(id string) (error, error) {
 		return nil, errors.New("not found")
 	}
 
-	err = u.repository.Remove(id)
+	err = u.removeRepository.Remove(id)
 	if err != nil {
 		return err, nil
 	}

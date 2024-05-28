@@ -38,7 +38,7 @@ func (h *loginHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.loginUseCase.GetByEmail(&input)
+	user, err := h.loginUseCase.GetUserDataForLogin(&input)
 	if err != nil {
 		web_response_manager.RespondInternalServerError(w, err)
 		return

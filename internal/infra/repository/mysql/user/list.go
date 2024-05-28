@@ -2,11 +2,9 @@ package user_mysql_repository
 
 import (
 	"database/sql"
-	"fmt"
-	"strings"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
-	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
+	default_mysql_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/mysql/default"
 )
 
 type listUserRepository struct {
@@ -19,94 +17,47 @@ func NewListUserRepository(db *sql.DB) *listUserRepository {
 	return repository
 }
 
-func (r *UserRepositoryMysql) List(input *user_entity.ListUserParams) ([]*user_entity.User, error) {
+func (r *listUserRepository) List(input *user_entity.ListUserDto) ([]*user_entity.User, int, error) {
 	var result []*user_entity.User
 
-	limit := input.Limit
-	offset := (input.Page - 1) * limit
+	mappedWhere := r.getWhereMap(input)
+	fieldsToGet := []string{"id", "name", "email", "birth", "active"}
 
-	query := fmt.Sprintf("SELECT ID, name, email, birth, active FROM %s ", TableName)
-
-	query += r.getWhereForList(input)
-	query += r.getOrderByForList(input)
-	query += fmt.Sprintf(" LIMIT %d ", limit)
-	query += fmt.Sprintf(" OFFSET %d ", offset)
-
-	rows, err := r.DB.Query(query)
+	mappedResult, total, err := default_mysql_repository.List(&input.List, r, fieldsToGet, mappedWhere)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	defer rows.Close()
-
-	for rows.Next() {
-		var user user_entity.User
-		var birth string
-
-		err = rows.Scan(&user.ID, &user.Name, &user.Email, &birth, &user.Active)
+	for _, v := range mappedResult {
+		user, err := user_entity.NewUserFromMap(v)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
-		parsedDate, err := util_entity.GetDateFromString(birth)
-		if err != nil {
-			return nil, err
-		}
-
-		user.Birth = parsedDate
-
-		result = append(result, &user)
+		result = append(result, user)
 	}
 
-	return result, nil
+	return result, total, nil
 }
 
-func (r *UserRepositoryMysql) getWhereForList(input *user_entity.ListUserParams) string {
-	result := ""
-	cond := []string{}
+func (r *listUserRepository) getWhereMap(input *user_entity.ListUserDto) map[string]interface{} {
+	whereMap := make(map[string]interface{})
 
 	if input.ID != "" {
-		cond = append(cond, fmt.Sprintf(" ID LIKE '%%%s%%' ", input.ID))
+		whereMap["ID"] = input.ID
 	}
 
 	if input.Email != "" {
-		cond = append(cond, fmt.Sprintf(" email LIKE '%%%s%%' ", input.Email))
+		whereMap["email"] = input.Email
 	}
 
 	if input.Name != "" {
-		cond = append(cond, fmt.Sprintf(" name LIKE '%%%s%%' ", input.Name))
+		whereMap["name"] = input.Name
 	}
 
 	if input.WillFilterActives {
-		cond = append(cond, fmt.Sprintf(" active = %t ", input.Active))
+		whereMap["active"] = input.Active
 	}
 
-	if input.Q != "" {
-		cond = append(cond, fmt.Sprintf(` ( 
-			email LIKE '%%%s%%' OR 
-			name LIKE '%%%s%%' OR
-			ID LIKE '%%%s%%'
-		)`, input.Q, input.Q, input.Q))
-	}
-
-	if len(cond) > 0 {
-		result = fmt.Sprintf(" WHERE %s ", strings.Join(cond, " AND "))
-	}
-
-	return result
-}
-
-func (r *UserRepositoryMysql) getOrderByForList(input *user_entity.ListUserParams) string {
-	result := ""
-	orderType := " ASC "
-
-	if input.OrderType != "" {
-		orderType = " " + input.OrderType + " "
-	}
-
-	if input.OrderBy != "" {
-		result = fmt.Sprintf(" ORDER BY %s %s ", input.OrderBy, orderType)
-	}
-
-	return result
+	return whereMap
 }

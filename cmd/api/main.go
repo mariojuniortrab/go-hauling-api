@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	infra_adapters "github.com/mariojuniortrab/hauling-api/internal/infra/adapters"
-	web_assembler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/asembler"
+	web_assembler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/assembler"
 	user_routes "github.com/mariojuniortrab/hauling-api/internal/presentation/web/route/user"
 )
 

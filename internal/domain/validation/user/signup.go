@@ -14,10 +14,10 @@ type SignupValidation interface {
 }
 type signUpValidation struct {
 	validator  protocol_application.Validator
-	repository protocol_data.SignupRepository
+	repository protocol_data.GetUserByEmailRepository
 }
 
-func NewSignUpValidation(validator protocol_application.Validator, repository protocol_data.SignupRepository) *signUpValidation {
+func NewSignUpValidation(validator protocol_application.Validator, repository protocol_data.GetUserByEmailRepository) *signUpValidation {
 	return &signUpValidation{
 		validator,
 		repository,

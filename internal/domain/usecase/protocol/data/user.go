@@ -5,29 +5,25 @@ import (
 )
 
 type SignupRepository interface {
-	GetByEmail(email string, id string) (*user_entity.User, error)
 	Create(*user_entity.User) error
 }
 
-type LoginRepository interface {
-	GetByEmail(email string, id string) (*user_entity.User, error)
-	Login(email string, password string) (*user_entity.User, error)
-}
-
 type ListUserRepository interface {
-	List(input *user_entity.ListUserParams) ([]*user_entity.User, error)
+	List(input *user_entity.ListUserDto) ([]*user_entity.User, int, error)
 }
 
-type DetailUserRepository interface {
+type GetUserByIdRepository interface {
 	GetById(id string) (*user_entity.User, error)
 }
 
 type RemoveUserRepository interface {
-	GetById(id string) (*user_entity.User, error)
 	Remove(id string) error
 }
 
 type UpdateRepository interface {
 	GetForUpdate(id string) (*user_entity.User, error)
 	Update(id string, editedUser *user_entity.User) (*user_entity.User, error)
+}
+type GetUserByEmailRepository interface {
+	GetByEmail(email string, id string) (*user_entity.User, error)
 }

@@ -9,13 +9,13 @@ import (
 const timeToExpire = 4
 
 type Login struct {
-	repository protocol_data.LoginRepository
-	tokenizer  protocol_application.Tokenizer
+	getUserByEmailRepository protocol_data.GetUserByEmailRepository
+	tokenizer                protocol_application.Tokenizer
 }
 
-func NewLoginUseCase(repository protocol_data.LoginRepository,
+func NewLoginUseCase(getUserByEmailRepository protocol_data.GetUserByEmailRepository,
 	tokenizer protocol_application.Tokenizer) *Login {
-	return &Login{repository, tokenizer}
+	return &Login{getUserByEmailRepository, tokenizer}
 }
 
 func (u *Login) Execute(input *auth_entity.LoginDto) (*auth_entity.LoginOutputDto, error) {
@@ -27,8 +27,8 @@ func (u *Login) Execute(input *auth_entity.LoginDto) (*auth_entity.LoginOutputDt
 	return auth_entity.NewLoginOutputDto(input, token), nil
 }
 
-func (u *Login) GetByEmail(input *auth_entity.LoginInputDto) (*auth_entity.LoginDto, error) {
-	user, err := u.repository.GetByEmail(*input.Email, "")
+func (u *Login) GetUserDataForLogin(input *auth_entity.LoginInputDto) (*auth_entity.LoginDto, error) {
+	user, err := u.getUserByEmailRepository.GetByEmail(*input.Email, "")
 	if err != nil {
 		return nil, err
 	}

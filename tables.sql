@@ -12,6 +12,7 @@ create table users
 
 create table brands
 (
-  id varchar(255),
-  name varchar(255)
+  ID varchar(255),
+  name varchar(255),
+  PRIMARY KEY (ID)
 );

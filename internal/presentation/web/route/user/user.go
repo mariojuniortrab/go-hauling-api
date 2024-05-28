@@ -4,7 +4,7 @@ import (
 	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
-	web_assembler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/asembler"
+	web_assembler "github.com/mariojuniortrab/hauling-api/internal/presentation/web/assembler"
 )
 
 type router struct {

@@ -13,15 +13,15 @@ func NewListUseCase(repository protocol_data.ListUserRepository) *List {
 	return &List{repository}
 }
 
-func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOutputDto, error) {
-	listUserParams, err := user_entity.NewListUserParams(input)
+func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOutputDto, int, error) {
+	listUserDto, err := user_entity.NewListUserDto(input)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	users, err := u.repository.List(listUserParams)
+	users, total, err := u.repository.List(listUserDto)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	result := &user_entity.ListOutputDto{}
@@ -30,5 +30,5 @@ func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOu
 		result.Items = append(result.Items, user_entity.NewUserDetailOutputDto(user))
 	}
 
-	return result, nil
+	return result, total, nil
 }

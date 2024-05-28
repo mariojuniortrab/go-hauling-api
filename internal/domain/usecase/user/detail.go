@@ -6,10 +6,10 @@ import (
 )
 
 type DetailUserUseCase struct {
-	repository protocol_data.DetailUserRepository
+	repository protocol_data.GetUserByIdRepository
 }
 
-func NewDetailuserUsecase(repository protocol_data.DetailUserRepository) *DetailUserUseCase {
+func NewDetailUserUsecase(repository protocol_data.GetUserByIdRepository) *DetailUserUseCase {
 	return &DetailUserUseCase{repository}
 }
 

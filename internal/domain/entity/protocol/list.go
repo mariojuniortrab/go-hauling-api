@@ -21,7 +21,11 @@ type ListInputDto struct {
 	Q         string
 }
 
-func FillFromInput(input *ListInputDto, output *List) error {
+type ListOutputDto struct {
+	Total int
+}
+
+func FillFromInput(input *ListInputDto, list *List) error {
 	page, err := strconv.Atoi(input.Page)
 	if err != nil {
 		return err
@@ -32,11 +36,11 @@ func FillFromInput(input *ListInputDto, output *List) error {
 		return err
 	}
 
-	output.Page = page
-	output.Limit = limit
-	output.OrderBy = strings.ToLower(input.OrderBy)
-	output.OrderType = strings.ToLower(input.OrderType)
-	output.Q = input.Q
+	list.Page = page
+	list.Limit = limit
+	list.OrderBy = strings.ToLower(input.OrderBy)
+	list.OrderType = strings.ToLower(input.OrderType)
+	list.Q = input.Q
 
 	return nil
 }

@@ -2,13 +2,12 @@ package user_mysql_repository
 
 import (
 	"database/sql"
-	"fmt"
 
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
+	default_mysql_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/mysql/default"
 )
 
 type signupRepository struct {
-	DetailUserRepository
 	UserRepositoryMysql
 }
 
@@ -18,15 +17,6 @@ func NewSignupRepository(db *sql.DB) *signupRepository {
 	return repository
 }
 
-func (r *UserRepositoryMysql) Create(user *user_entity.User) error {
-	query := fmt.Sprintf("INSERT INTO %s (id, name, email, password, active, birth) VALUES (?,?,?,?,?,?)", TableName)
-
-	_, err := r.DB.Exec(query,
-		user.ID, user.Name, user.Email, user.Password, user.Active, user.Birth)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (r *signupRepository) Create(user *user_entity.User) error {
+	return default_mysql_repository.Insert(r, user.Map(true))
 }

@@ -2,7 +2,7 @@ package user_entity
 
 import protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
 
-type ListUserParams struct {
+type ListUserDto struct {
 	protocol_entity.List
 	ID                string
 	Name              string
@@ -24,10 +24,11 @@ type ListUserInputDto struct {
 }
 
 type ListOutputDto struct {
+	protocol_entity.ListOutputDto
 	Items []*UserDetailOutputDto `json:"items"`
 }
 
-func NewListUserParams(input *ListUserInputDto) (*ListUserParams, error) {
+func NewListUserDto(input *ListUserInputDto) (*ListUserDto, error) {
 	willFilterActives := false
 	active := false
 
@@ -39,7 +40,7 @@ func NewListUserParams(input *ListUserInputDto) (*ListUserParams, error) {
 		active = true
 	}
 
-	listUserParams := &ListUserParams{
+	listUserDto := &ListUserDto{
 		Active:            active,
 		WillFilterActives: willFilterActives,
 		ID:                input.ID,
@@ -47,10 +48,10 @@ func NewListUserParams(input *ListUserInputDto) (*ListUserParams, error) {
 		Email:             input.Email,
 	}
 
-	err := protocol_entity.FillFromInput(&input.ListInputDto, &listUserParams.List)
+	err := protocol_entity.FillFromInput(&input.ListInputDto, &listUserDto.List)
 	if err != nil {
 		return nil, err
 	}
 
-	return listUserParams, nil
+	return listUserDto, nil
 }

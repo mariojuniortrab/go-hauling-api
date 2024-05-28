@@ -14,6 +14,11 @@ type messageSucessful struct {
 	Data    interface{} `json:"data"`
 }
 
+type messageList struct {
+	messageSucessful
+	total int `json:"total"`
+}
+
 type messageFieldErrorArray struct {
 	Errors []*errors_validation.CustomFieldErrorMessage
 }
@@ -30,6 +35,7 @@ func setJsonContentTypeResponse(w http.ResponseWriter) {
 }
 
 func RespondOk(w http.ResponseWriter, message string, data any) {
+	setJsonContentTypeResponse(w)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&messageSucessful{Message: message, Data: data})
 }
@@ -108,4 +114,15 @@ func RespondUiidInvalid(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusCreated)
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.Unauthorized())
 	json.NewEncoder(w).Encode(&messageError{Error: errorMessage})
+}
+
+func RespondOkList(w http.ResponseWriter, message string, data any, total int) {
+	setJsonContentTypeResponse(w)
+	w.WriteHeader(http.StatusOK)
+
+	response := &messageList{total: total}
+	response.Message = message
+	response.Data = data
+
+	json.NewEncoder(w).Encode(response)
 }

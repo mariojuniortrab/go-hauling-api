@@ -62,7 +62,8 @@ func (a *UserAssembler) GetAssembledUpdateUserHandle() http.HandlerFunc {
 
 func (a *UserAssembler) assembleSignupHandler() protocol_application.Handler {
 	signupRepository := user_mysql_repository.NewSignupRepository(a.mysqlDB)
-	signUpValidation := user_validation.NewSignUpValidation(a.validator, signupRepository)
+	getUserByEmailRepository := user_mysql_repository.NewGetUserByEmailRepository(a.mysqlDB)
+	signUpValidation := user_validation.NewSignUpValidation(a.validator, getUserByEmailRepository)
 	signUpUseCase := auth_usecase.NewSignupUseCase(signupRepository, a.encrypter)
 	signupHandler := user_handler.NewSignupHandler(signUpValidation, signUpUseCase)
 
@@ -70,9 +71,9 @@ func (a *UserAssembler) assembleSignupHandler() protocol_application.Handler {
 }
 
 func (a *UserAssembler) assembleLoginHandler() protocol_application.Handler {
-	loginRepository := user_mysql_repository.NewLoginRepository(a.mysqlDB)
+	getUserByEmailRepository := user_mysql_repository.NewGetUserByEmailRepository(a.mysqlDB)
 	loginValidation := user_validation.NewLoginValidation(a.validator, a.encrypter)
-	loginUseCase := auth_usecase.NewLoginUseCase(loginRepository, a.tokenizer)
+	loginUseCase := auth_usecase.NewLoginUseCase(getUserByEmailRepository, a.tokenizer)
 	loginHandler := user_handler.NewLoginHandle(loginValidation, loginUseCase)
 
 	return loginHandler
@@ -88,16 +89,17 @@ func (a *UserAssembler) assembleListUserHandler() protocol_application.Handler {
 }
 
 func (a *UserAssembler) assembleDetailUserHandler() protocol_application.Handler {
-	detailRepository := user_mysql_repository.NewDetailUserRepository(a.mysqlDB)
-	detailUseCase := user_usecase.NewDetailuserUsecase(detailRepository)
+	getUserByIdRepository := user_mysql_repository.NewGetUserByIdRepository(a.mysqlDB)
+	detailUseCase := user_usecase.NewDetailUserUsecase(getUserByIdRepository)
 	detailHandler := user_handler.NewDetailHandler(a.urlParser, detailUseCase)
 
 	return detailHandler
 }
 
 func (a *UserAssembler) assembleRemoveUserHandler() protocol_application.Handler {
+	getUserByIdRepository := user_mysql_repository.NewGetUserByIdRepository(a.mysqlDB)
 	removeRepository := user_mysql_repository.NewRemoveUserRepository(a.mysqlDB)
-	removeUseCase := user_usecase.NewRemoveUserUsecase(removeRepository)
+	removeUseCase := user_usecase.NewRemoveUserUsecase(getUserByIdRepository, removeRepository)
 	removeHandler := user_handler.NewRemoveHandler(a.urlParser, removeUseCase)
 
 	return removeHandler
