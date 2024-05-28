@@ -120,7 +120,7 @@ func RespondOkList(w http.ResponseWriter, message string, data any, total int) {
 	setJsonContentTypeResponse(w)
 	w.WriteHeader(http.StatusOK)
 
-	response := &messageList{total: total}
+	response := &messageList{Total: total}
 	response.Message = message
 	response.Data = data
 
