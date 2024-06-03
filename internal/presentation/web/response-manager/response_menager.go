@@ -9,14 +9,13 @@ import (
 	errors_validation "github.com/mariojuniortrab/hauling-api/internal/domain/validation/errors"
 )
 
+type messageText struct {
+	Message string `json:"message"`
+}
+
 type messageSucessful struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
-}
-
-type messageList struct {
-	messageSucessful
-	Total int `json:"total"`
 }
 
 type messageFieldErrorArray struct {
@@ -37,7 +36,11 @@ func setJsonContentTypeResponse(w http.ResponseWriter) {
 func RespondOk(w http.ResponseWriter, message string, data any) {
 	setJsonContentTypeResponse(w)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&messageSucessful{Message: message, Data: data})
+	if data != nil {
+		json.NewEncoder(w).Encode(&messageSucessful{Message: message, Data: data})
+	} else {
+		json.NewEncoder(w).Encode(&messageText{Message: message})
+	}
 }
 
 func RespondUiidIsRequired(w http.ResponseWriter) {
@@ -114,15 +117,4 @@ func RespondUiidInvalid(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusCreated)
 	errorMessage := errors_validation.NewCustomErrorMessage(errors_validation.Unauthorized())
 	json.NewEncoder(w).Encode(&messageError{Error: errorMessage})
-}
-
-func RespondOkList(w http.ResponseWriter, message string, data any, total int) {
-	setJsonContentTypeResponse(w)
-	w.WriteHeader(http.StatusOK)
-
-	response := &messageList{Total: total}
-	response.Message = message
-	response.Data = data
-
-	json.NewEncoder(w).Encode(response)
 }

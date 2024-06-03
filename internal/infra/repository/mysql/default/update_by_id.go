@@ -2,6 +2,7 @@ package default_mysql_repository
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	protocols_mysql_repository "github.com/mariojuniortrab/hauling-api/internal/infra/repository/mysql/protocols"
@@ -25,7 +26,10 @@ func UpdateById(r protocols_mysql_repository.DefaultRepositoryProtocol, mappedVa
 	query := strings.Replace(rawUpdateQuery, "##table##", r.GetTableName(), 1)
 	query = strings.Replace(query, "##set##", strings.Join(setList, ","), 1)
 
-	_, err := r.GetDb().Exec(query, valuesList)
+	log.Println(query)
+	log.Println("valuesList:", valuesList)
+
+	_, err := r.GetDb().Exec(query, valuesList...)
 
 	if err != nil {
 		return err

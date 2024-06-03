@@ -32,8 +32,12 @@ func NewUser(name, password, email string, birth time.Time) *User {
 func NewUserFromMap(mappedResult map[string]string) (*User, error) {
 	user := &User{}
 
-	if mappedResult["ID"] != "" || mappedResult["id"] != "" {
+	if mappedResult["ID"] != "" {
 		user.ID = mappedResult["ID"]
+	}
+
+	if mappedResult["id"] != "" {
+		user.ID = mappedResult["id"]
 	}
 
 	if mappedResult["name"] != "" {
@@ -49,7 +53,7 @@ func NewUserFromMap(mappedResult map[string]string) (*User, error) {
 	}
 
 	if mappedResult["active"] != "" {
-		user.Active = strings.ToLower(mappedResult["active"]) == "true"
+		user.Active = strings.ToLower(mappedResult["active"]) == "true" || mappedResult["active"] == "1"
 	}
 
 	if mappedResult["birth"] != "" {

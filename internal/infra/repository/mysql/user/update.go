@@ -18,10 +18,13 @@ func NewUpdateUserRepository(db *sql.DB) *updateUserRepository {
 }
 
 func (r *updateUserRepository) GetForUpdate(id string) (*user_entity.User, error) {
-	fieldsToGet := []string{"id", "name", "password", "active", "birth"}
+	fieldsToGet := []string{"id", "name", "password", "active", "birth", "email"}
 	mappedResult, err := default_mysql_repository.GetById(r, fieldsToGet, id)
 	if err != nil {
 		return nil, err
+	}
+	if mappedResult == nil {
+		return nil, nil
 	}
 
 	user, err := user_entity.NewUserFromMap(mappedResult)

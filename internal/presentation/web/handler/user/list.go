@@ -37,13 +37,13 @@ func (h *listHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, total, err := h.listUseCase.Execute(&input)
+	result, err := h.listUseCase.Execute(&input)
 	if err != nil {
 		web_response_manager.RespondInternalServerError(w, err)
 		return
 	}
 
-	web_response_manager.RespondOkList(w, "success", result, total)
+	web_response_manager.RespondOk(w, "success", result)
 }
 
 func (h *listHandler) parseUrlParams(r *http.Request, input *user_entity.ListUserInputDto) {

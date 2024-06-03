@@ -22,7 +22,7 @@ type ListInputDto struct {
 }
 
 type ListOutputDto struct {
-	Total int
+	Total int `json:"total"`
 }
 
 func FillFromInput(input *ListInputDto, list *List) error {

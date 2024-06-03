@@ -6,18 +6,14 @@ func MapOrderedFieldsFromRows(fieldsToGet []string, rows *sql.Rows) ([]map[strin
 	var result []map[string]string
 
 	for rows.Next() {
-		inputs := make([]*string, len(fieldsToGet))
-		err := rows.Scan(inputs)
+		inputs := NewDumbArrayForScan(fieldsToGet)
+
+		err := rows.Scan(inputs...)
 		if err != nil {
 			return nil, err
 		}
 
-		var fields = map[string]string{}
-		for i, v := range fieldsToGet {
-			fields[v] = *inputs[i]
-		}
-
-		result = append(result, fields)
+		result = append(result, NewMapFromDumbArray(inputs, fieldsToGet))
 	}
 
 	return result, nil

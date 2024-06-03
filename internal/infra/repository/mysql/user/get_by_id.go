@@ -24,6 +24,9 @@ func (r *getUserByIdRepository) GetById(id string) (*user_entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	if mappedResult == nil {
+		return nil, nil
+	}
 
 	user, err := user_entity.NewUserFromMap(mappedResult)
 	if err != nil {

@@ -25,7 +25,7 @@ func Insert(r protocols_mysql_repository.DefaultRepositoryProtocol, mappedValues
 	query = strings.Replace(query, "##fields##", strings.Join(fieldList, ","), 1)
 	query = strings.Replace(query, "##values##", strings.Join(markList, ","), 1)
 
-	_, err := r.GetDb().Exec(query, fieldList)
+	_, err := r.GetDb().Exec(query, valuesList...)
 
 	if err != nil {
 		return err

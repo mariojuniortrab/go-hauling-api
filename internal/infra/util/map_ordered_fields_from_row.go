@@ -1,10 +1,12 @@
 package infra_util
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 func MapOrderedFieldsFromRow(fieldsToGet []string, row *sql.Row) (map[string]string, error) {
-	inputs := make([]*string, len(fieldsToGet))
-	err := row.Scan(inputs)
+	inputs := NewDumbArrayForScan(fieldsToGet)
+	err := row.Scan(inputs...)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -14,10 +16,5 @@ func MapOrderedFieldsFromRow(fieldsToGet []string, row *sql.Row) (map[string]str
 		return nil, err
 	}
 
-	var fields = map[string]string{}
-	for i, v := range fieldsToGet {
-		fields[v] = *inputs[i]
-	}
-
-	return fields, nil
+	return NewMapFromDumbArray(inputs, fieldsToGet), nil
 }

@@ -23,7 +23,7 @@ func GetByField(
 
 	query += where
 
-	row := r.GetDb().QueryRow(query, values)
+	row := r.GetDb().QueryRow(query, values...)
 
 	return infra_util.MapOrderedFieldsFromRow(fieldsToGet, row)
 }

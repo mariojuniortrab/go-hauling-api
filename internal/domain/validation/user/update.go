@@ -1,8 +1,6 @@
 package user_validation
 
 import (
-	"log"
-
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
@@ -23,8 +21,6 @@ func NewUpdateValidation(validator protocol_application.Validator) *updateValida
 }
 
 func (v *updateValidation) Validate(input *user_entity.UserUpdateInputDto) []*errors_validation.CustomFieldErrorMessage {
-	log.Printf("input: %v \n", input)
-
 	if input.Password != nil {
 		v.validatePassword(*input.Password)
 	}

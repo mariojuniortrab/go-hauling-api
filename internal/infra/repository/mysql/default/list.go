@@ -20,9 +20,10 @@ func List(list *protocol_entity.List,
 	query := strings.Replace(rawSelectQuery, "##table##", r.GetTableName(), 1)
 
 	query += mountListWhere(mappedWhere, list)
+	total, err := getTotalRows(r, query)
+
 	query = strings.Replace(query, "##fields##", strings.Join(fieldsToGet, ","), 1)
 
-	total, err := getTotalRows(r, query)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -9,7 +9,9 @@ import (
 func RemoveById(r protocols_mysql_repository.DefaultRepositoryProtocol, id string) error {
 
 	query := strings.Replace(rawDeleteQuery, "##table##", r.GetTableName(), 1)
+
 	_, err := r.GetDb().Exec(query, id)
+
 	if err != nil {
 		return err
 	}

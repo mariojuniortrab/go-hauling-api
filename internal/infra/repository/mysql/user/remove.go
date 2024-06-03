@@ -8,7 +8,6 @@ import (
 
 type removeUserRepository struct {
 	UserRepositoryMysql
-	DB *sql.DB
 }
 
 func NewRemoveUserRepository(db *sql.DB) *removeUserRepository {
