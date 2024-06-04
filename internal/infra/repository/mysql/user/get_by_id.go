@@ -18,7 +18,8 @@ func NewGetUserByIdRepository(db *sql.DB) *getUserByIdRepository {
 }
 
 func (r *getUserByIdRepository) GetById(id string) (*user_entity.User, error) {
-	fieldsToGet := []string{"id", "name", "email", "active", "birth"}
+	fieldsToGet := []string{"id", "name", "email", "active", "birth", "created_at",
+		"updated_at", "created_id", "updated_id"}
 
 	mappedResult, err := default_mysql_repository.GetById(r, fieldsToGet, id)
 	if err != nil {

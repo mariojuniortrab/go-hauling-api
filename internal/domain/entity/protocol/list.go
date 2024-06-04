@@ -25,7 +25,7 @@ type ListOutputDto struct {
 	Total int `json:"total"`
 }
 
-func FillFromInput(input *ListInputDto, list *List) error {
+func FillListFromInput(input *ListInputDto, list *List) error {
 	page, err := strconv.Atoi(input.Page)
 	if err != nil {
 		return err

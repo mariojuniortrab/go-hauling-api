@@ -1,24 +1,23 @@
-package auth_usecase
+package user_usecase
 
 import (
-	auth_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/auth"
 	user_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/user"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 	protocol_application "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/application"
 	protocol_data "github.com/mariojuniortrab/hauling-api/internal/domain/usecase/protocol/data"
 )
 
-type Signup struct {
-	repository protocol_data.SignupRepository
+type Create struct {
+	repository protocol_data.CreateUserRepository
 	encrypter  protocol_application.Encrypter
 }
 
-func NewSignupUseCase(repository protocol_data.SignupRepository,
-	encrypter protocol_application.Encrypter) *Signup {
-	return &Signup{repository, encrypter}
+func NewCreateUserUseCase(repository protocol_data.CreateUserRepository,
+	encrypter protocol_application.Encrypter) *Create {
+	return &Create{repository, encrypter}
 }
 
-func (u *Signup) Execute(input *auth_entity.SignupInputDto) (*auth_entity.SignupOutputDto, error) {
+func (u *Create) Execute(input *user_entity.CreateUserInputDto, loggedUserId string) (*user_entity.CreateUserOutputDto, error) {
 
 	formattedDate, err := util_entity.GetDateFromString(*input.Birth)
 	if err != nil {
@@ -31,12 +30,12 @@ func (u *Signup) Execute(input *auth_entity.SignupInputDto) (*auth_entity.Signup
 	}
 
 	user := user_entity.NewUser(*input.Name, hashPassword, *input.Email, formattedDate)
-	user.FillUpdatableFieldsForCreate(user.ID)
+	user.FillUpdatableFieldsForCreate(loggedUserId)
 
 	err = u.repository.Create(user)
 	if err != nil {
 		return nil, err
 	}
 
-	return auth_entity.NewSignupOutputDto(user), nil
+	return user_entity.NewCreateUserOutputDto(user), nil
 }

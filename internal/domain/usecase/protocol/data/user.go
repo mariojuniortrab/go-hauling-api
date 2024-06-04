@@ -8,6 +8,10 @@ type SignupRepository interface {
 	Create(*user_entity.User) error
 }
 
+type CreateUserRepository interface {
+	Create(*user_entity.User) error
+}
+
 type ListUserRepository interface {
 	List(input *user_entity.ListUserDto) ([]*user_entity.User, int, error)
 }

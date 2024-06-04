@@ -1,6 +1,9 @@
 package user_entity
 
-import protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
+import (
+	protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
+	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
+)
 
 type ListUserDto struct {
 	protocol_entity.List
@@ -9,6 +12,13 @@ type ListUserDto struct {
 	WillFilterActives bool
 	Active            bool
 	Email             string
+}
+type UserListItemOutputDto struct {
+	ID     string `json:"id"`
+	Email  string `json:"email"`
+	Name   string `json:"name"`
+	Birth  string `json:"birth"`
+	Active bool   `json:"active"`
 }
 
 type filter struct {
@@ -25,7 +35,7 @@ type ListUserInputDto struct {
 
 type ListOutputDto struct {
 	protocol_entity.ListOutputDto
-	Items []*UserDetailOutputDto `json:"items"`
+	Items []*UserListItemOutputDto `json:"items"`
 }
 
 func NewListUserDto(input *ListUserInputDto) (*ListUserDto, error) {
@@ -48,10 +58,22 @@ func NewListUserDto(input *ListUserInputDto) (*ListUserDto, error) {
 		Email:             input.Email,
 	}
 
-	err := protocol_entity.FillFromInput(&input.ListInputDto, &listUserDto.List)
+	err := protocol_entity.FillListFromInput(&input.ListInputDto, &listUserDto.List)
 	if err != nil {
 		return nil, err
 	}
 
 	return listUserDto, nil
+}
+
+func NewUserListItemOutputDto(user *User) *UserListItemOutputDto {
+	birth := util_entity.GetStringFromDate(user.Birth)
+
+	return &UserListItemOutputDto{
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Birth:  birth,
+		Active: user.Active,
+	}
 }

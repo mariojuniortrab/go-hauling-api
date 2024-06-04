@@ -60,6 +60,10 @@ func (a *UserAssembler) GetAssembledUpdateUserHandle() http.HandlerFunc {
 	return a.assembleUpdateUserHandler().Handle
 }
 
+func (a *UserAssembler) GetAssembledCreateUserHandle() http.HandlerFunc {
+	return a.assembleCreateUserHandler().Handle
+}
+
 func (a *UserAssembler) assembleSignupHandler() protocol_application.Handler {
 	signupRepository := user_mysql_repository.NewSignupRepository(a.mysqlDB)
 	getUserByEmailRepository := user_mysql_repository.NewGetUserByEmailRepository(a.mysqlDB)
@@ -110,6 +114,16 @@ func (a *UserAssembler) assembleUpdateUserHandler() protocol_application.Handler
 	updateValidation := user_validation.NewUpdateValidation(a.validator)
 	updateUseCase := user_usecase.NewUpdateUserUsecase(updateRepository, a.encrypter)
 	updateHandler := user_handler.NewUpdateHandler(a.urlParser, updateUseCase, updateValidation)
+
+	return updateHandler
+}
+
+func (a *UserAssembler) assembleCreateUserHandler() protocol_application.Handler {
+	createRepository := user_mysql_repository.NewCreateUserRepository(a.mysqlDB)
+	getUserByEmailRepository := user_mysql_repository.NewGetUserByEmailRepository(a.mysqlDB)
+	createUserValidation := user_validation.NewCreateUserValidation(a.validator, getUserByEmailRepository)
+	createUseCase := user_usecase.NewCreateUserUseCase(createRepository, a.encrypter)
+	updateHandler := user_handler.NewCreateUserHandler(createUserValidation, createUseCase)
 
 	return updateHandler
 }

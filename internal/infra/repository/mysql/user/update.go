@@ -18,7 +18,8 @@ func NewUpdateUserRepository(db *sql.DB) *updateUserRepository {
 }
 
 func (r *updateUserRepository) GetForUpdate(id string) (*user_entity.User, error) {
-	fieldsToGet := []string{"id", "name", "password", "active", "birth", "email"}
+	fieldsToGet := []string{"id", "name", "password", "active", "birth", "email", "created_at",
+		"updated_at", "created_id", "updated_id"}
 	mappedResult, err := default_mysql_repository.GetById(r, fieldsToGet, id)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,8 @@ func (r *updateUserRepository) Update(id string, editedUser *user_entity.User) (
 }
 
 func (r *updateUserRepository) getUpdatedUser(id string) (*user_entity.User, error) {
-	fieldsToGet := []string{"id", "name", "email", "active", "birth"}
+	fieldsToGet := []string{"id", "name", "email", "active", "birth", "created_at",
+		"updated_at", "created_id", "updated_id"}
 
 	mappedResult, err := default_mysql_repository.GetById(r, fieldsToGet, id)
 	if err != nil {

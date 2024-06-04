@@ -41,6 +41,9 @@ func (h *updateHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	editedUser, err := h.updateUseCase.GetEditedUser(id, &payload)
+	loggedUserId := r.Context().Value(protocol_application.UserIdKey).(string)
+	editedUser.FillUpdatableFieldsForUpdate(loggedUserId)
+
 	if err != nil {
 		web_response_manager.RespondInternalServerError(w, err)
 		return

@@ -27,7 +27,7 @@ func (u *List) Execute(input *user_entity.ListUserInputDto) (*user_entity.ListOu
 	result := &user_entity.ListOutputDto{}
 
 	for _, user := range users {
-		result.Items = append(result.Items, user_entity.NewUserDetailOutputDto(user))
+		result.Items = append(result.Items, user_entity.NewUserListItemOutputDto(user))
 	}
 
 	result.Total = total

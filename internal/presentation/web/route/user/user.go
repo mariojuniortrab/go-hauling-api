@@ -32,6 +32,7 @@ func (r *router) Route(route protocol_application.Router) protocol_application.R
 		rr.Use(protected)
 
 		r.routeListUser(rr)
+		r.routeCreateUser(rr)
 
 		rr.Group(func(rrr protocol_application.Router) {
 			uuidParser := r.middlewareAssembler.GetAssembledUuidParserMiddleware()
@@ -39,10 +40,7 @@ func (r *router) Route(route protocol_application.Router) protocol_application.R
 
 			r.routeGetUser(rrr)
 			r.routeDeleteUser(rrr)
-
-			var userUpdateInputDto user_entity.UserUpdateInputDto
-			updateBodyValidation := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&userUpdateInputDto)
-			rrr.With(updateBodyValidation).Patch("/{id}", r.userAssembler.GetAssembledUpdateUserHandle())
+			r.routeUpdateUser(rrr)
 		})
 	})
 
@@ -78,4 +76,10 @@ func (r *router) routeUpdateUser(route protocol_application.Router) {
 	var userUpdateInputDto user_entity.UserUpdateInputDto
 	updateBodyValidation := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&userUpdateInputDto)
 	route.With(updateBodyValidation).Patch("/{id}", r.userAssembler.GetAssembledUpdateUserHandle())
+}
+
+func (r *router) routeCreateUser(route protocol_application.Router) {
+	var userCreateInputDto user_entity.CreateUserInputDto
+	createBodyValidation := r.middlewareAssembler.GetAssmbledBodyValidatorMiddleware(&userCreateInputDto)
+	route.With(createBodyValidation).Post("/", r.userAssembler.GetAssembledCreateUserHandle())
 }

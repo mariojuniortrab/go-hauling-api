@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	protocol_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/protocol"
 	util_entity "github.com/mariojuniortrab/hauling-api/internal/domain/entity/util"
 )
 
 type User struct {
+	protocol_entity.Updatable
 	ID       string
 	Name     string
 	Password string
@@ -18,15 +20,18 @@ type User struct {
 }
 
 func NewUser(name, password, email string, birth time.Time) *User {
+	userId := uuid.New().String()
 
-	return &User{
-		ID:       uuid.New().String(),
+	user := &User{
+		ID:       userId,
 		Name:     name,
 		Password: password,
 		Active:   true,
 		Email:    email,
 		Birth:    birth,
 	}
+
+	return user
 }
 
 func NewUserFromMap(mappedResult map[string]string) (*User, error) {
@@ -64,6 +69,11 @@ func NewUserFromMap(mappedResult map[string]string) (*User, error) {
 		user.Birth = parsedDate
 	}
 
+	err := user.FillUpdatableFieldsFromMap(mappedResult)
+	if err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 
@@ -80,5 +90,5 @@ func (u *User) Map(withId bool) map[string]interface{} {
 		userMap["ID"] = u.ID
 	}
 
-	return userMap
+	return u.MapUpdatableFields(userMap)
 }
